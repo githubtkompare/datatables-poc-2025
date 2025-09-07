@@ -8,10 +8,10 @@ This project showcases a complete software product tracking system built to mana
 
 ### Key Highlights
 
-- **Interactive DataTables Integration**: Advanced table functionality with search, filtering, sorting, and export capabilities
+- **Interactive DataTables Integration**: Advanced table functionality with search, filtering, sorting, and responsive design
 - **Role-Based Software Management**: Flexible assignment system for business and technical ownership
-- **Hierarchical Organization Structure**: Support for complex university unit hierarchies
-- **Comprehensive Admin Tools**: Built-in database testing, performance monitoring, and health checks
+- **University Organization Structure**: Support for university unit hierarchies with employee and software assignments  
+- **Comprehensive Admin Tools**: Database table inspection, statistics monitoring, and clickable table exploration
 - **Modern Development Stack**: PHP 8.3, MySQL 8.0, Twig templating, Bootstrap 5
 - **Containerized Architecture**: Full Docker-based deployment with Docker Compose
 
@@ -87,19 +87,28 @@ datatables-poc-2025/
    cd application
    ```
 
-3. **Start the application stack**
+3. **Set up environment configuration**
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your preferred settings if needed
+   ```
+
+4. **Start the application stack**
 
    ```bash
    docker-compose up -d
    ```
 
-4. **Wait for initialization** (first run takes 2-3 minutes)
-   - Database creation and schema setup
-   - Sample data population
-   - Application container build
+5. **Install PHP dependencies** (if not cached)
 
-5. **Access the application**
+   ```bash
+   docker-compose exec web composer install
+   ```
+
+6. **Access the application**
    - **Main Application**: <http://localhost:8080>
+   - **Admin Dashboard**: <http://localhost:8080/admin> (authentication required)
    - **Database Admin**: <http://localhost:8081>
      - Username: `datatables_user`
      - Password: `datatables_password`
@@ -120,14 +129,14 @@ The application automatically:
 #### 🏢 **Employee Management**
 
 - Complete CRUD operations for university staff
-- Department and job title tracking
-- Contact information management
-- Role assignment history
-- Advanced search and filtering
+- University unit association (instead of simple department text)
+- Job title and contact information management
+- Interactive DataTables with search and filtering
+- Role assignment relationships tracking
 
 #### 💻 **Software Product Management**
 
-- Comprehensive software inventory
+- Comprehensive software inventory with university unit assignments
 - Version and vendor tracking
 - Operating system compatibility matrix
 - License type management
@@ -136,18 +145,18 @@ The application automatically:
 #### 🏛 **University Unit Management**
 
 - Hierarchical organizational structure
-- Department and administrative unit types
-- Parent-child relationship support
-- Software assignment tracking
-- Unit-specific reporting
+- Self-referencing parent-child relationships
+- Department, college, administrative, support, and research unit types
+- Employee and software assignment tracking
+- Flexible organizational reporting
 
 #### 👥 **Role Assignment System**
 
 - **Business Owner**: Requirements and business decisions
-- **Technical Owner**: Implementation and maintenance
+- **Technical Owner**: Implementation and maintenance  
 - **Technical Manager**: Technical oversight and management
-- Flexible multi-role assignments per employee
-- Cross-software role tracking
+- Each software product has exactly one set of role assignments
+- Cross-employee role tracking and reporting
 
 ### Advanced DataTables Features
 
@@ -157,15 +166,15 @@ The application automatically:
 - **Advanced search**: Global and column-specific filtering
 - **Multi-column sorting**: Complex data ordering
 - **Responsive design**: Mobile-friendly table layouts
-- **Export functionality**: CSV, Excel, PDF export options
+- **Real-time updates**: Dynamic data loading and display
 
 #### 🔍 **Search & Filter Capabilities**
 
 - Real-time search across all columns
-- Date range filtering
-- Multi-select dropdown filters
-- Boolean status filtering
-- Custom filter combinations
+- Custom column rendering for different data types
+- Status indicators and badges
+- Responsive column display on mobile devices
+- Pagination with configurable page sizes
 
 #### 📈 **Data Visualization**
 
@@ -177,48 +186,39 @@ The application automatically:
 
 ### Administration & Monitoring
 
-#### 🔧 **Database Testing Suite** (`/admin/db-test`)
+#### 🔧 **Database Table Inspection** (`/admin`)
 
-- **Connection Testing**: Multi-connection performance analysis
-- **Query Performance**: Execution time monitoring
-- **Table Integrity**: Foreign key constraint validation
-- **Complex Query Testing**: View and aggregation performance
-- **Export Capabilities**: Test results download
-
-#### ⚡ **Performance Monitoring** (`/admin/performance-test`)
-
-- Real-time database metrics
-- Query execution analysis
-- Resource utilization tracking
-- Performance trend analysis
-- System health indicators
+- **Interactive Table Statistics**: Clickable table cards showing record counts
+- **Live Table Structure View**: Complete column definitions, types, keys, and constraints
+- **Real-time Data Viewing**: Browse actual table data with first 100 records
+- **Admin Authentication**: Secure access to database inspection tools
+- **Responsive Design**: Mobile-friendly admin interface
 
 #### 📊 **System Dashboard**
 
-- Live statistics and metrics
-- Recent activity monitoring
-- Quick action buttons
+- Live database table statistics
+- Quick navigation to table inspection views  
 - System status indicators
-- Performance overview
+- Administrative tool access
 
 ## 🗄 Database Architecture
 
 ### Schema Overview
 
-- **8 Core Tables**: Normalized relational design
-- **3 Database Views**: Optimized query performance
-- **9 Foreign Key Relationships**: Data integrity enforcement
-- **Comprehensive Indexing**: Query optimization
-- **ACID Compliance**: Full transactional support
+- **6 Core Tables**: Normalized relational design with proper foreign key relationships
+- **9 Foreign Key Relationships**: Data integrity enforcement across all tables
+- **Comprehensive Indexing**: Strategic index placement for query optimization
+- **ACID Compliance**: Full transactional support with InnoDB engine
+- **UTF8MB4 Character Set**: Full Unicode support including emoji
 
 ### Key Tables
 
-- **employees**: Staff information and contact details
-- **software_products**: Software inventory with metadata
-- **university_units**: Hierarchical organizational structure
-- **software_roles**: Role assignments and responsibilities
-- **operating_systems**: OS compatibility tracking
-- **software_operating_systems**: Software-OS compatibility mapping
+- **university_units**: Hierarchical organizational structure (self-referencing)
+- **employees**: Staff information with university_unit_id foreign key reference
+- **software_products**: Software inventory with university_unit_id association
+- **software_roles**: Role assignments linking employees to software products
+- **operating_systems**: Supported operating systems catalog
+- **software_operating_systems**: Software-OS compatibility mapping (many-to-many)
 
 For complete database documentation, see [DATABASE.md](DATABASE.md).
 
@@ -226,15 +226,18 @@ For complete database documentation, see [DATABASE.md](DATABASE.md).
 
 The application includes realistic sample data representing:
 
-- **10 Employees** across various university departments
-- **10 Software Products** (mix of vendor-managed and internal)
-- **10 University Units** representing academic and administrative departments
-- **Complete Role Assignments** demonstrating system flexibility
-- **Cross-departmental Usage Patterns** showing real-world complexity
+- **15 Employees** across various university departments with proper unit associations
+- **14 Software Products** (mix of vendor-managed and internal) with university unit assignments
+- **10 University Units** representing academic and administrative departments in hierarchical structure
+- **Complete Role Assignments** with business owners, technical owners, and technical managers
+- **OS Compatibility Matrix** showing software-operating system relationships
+- **Cross-departmental Usage Patterns** demonstrating real-world organizational complexity
 
 ## 🔧 Configuration & Customization
 
 ### Environment Configuration
+
+Create a `.env` file in the `application/` directory with the following settings (use `.env.example` as a template):
 
 ```bash
 # Database Settings
@@ -246,8 +249,10 @@ DB_PASSWORD=datatables_password
 # Application Settings
 APP_ENV=development
 APP_DEBUG=true
-APP_URL=http://localhost:8080
+APP_TIMEZONE=America/Chicago
 ```
+
+**Note**: The `.env` file is excluded from version control for security. Copy from `.env.example` and customize for your environment.
 
 ### Docker Services
 
