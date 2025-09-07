@@ -22,8 +22,6 @@ The database consists of 8 main tables and 3 views:
 4. [operating_systems](#operating_systems-table) - Supported operating systems
 5. [software_operating_systems](#software_operating_systems-table) - Software-OS compatibility (many-to-many)
 6. [software_roles](#software_roles-table) - Software ownership and management roles
-7. [software_unit_assignments](#software_unit_assignments-table) - Software-unit assignments (many-to-many)
-8. [audit_log](#audit_log-table) - Change tracking and audit trail
 
 ### Database Views
 
@@ -93,7 +91,6 @@ Represents organizational units within the university (departments, colleges, et
 **Relationships**:
 
 - Self-referencing for hierarchical structure
-- Referenced by `software_unit_assignments` for unit-software assignments
 
 ---
 
@@ -204,64 +201,6 @@ Defines business and technical ownership roles for each software product.
 
 ---
 
-### software_unit_assignments Table
-
-Many-to-many relationship table assigning software products to university units.
-
-| Field | Data Type | Null | Key | Default | Extra |
-|-------|-----------|------|-----|---------|-------|
-| id | INT | NO | PRI | NULL | auto_increment |
-| software_id | INT | NO | MUL | NULL | |
-| unit_id | INT | NO | MUL | NULL | |
-| assignment_date | DATE | YES | MUL | CURDATE() | DEFAULT_GENERATED |
-| status | ENUM('active','inactive','pending','retired') | YES | MUL | 'active' | |
-| notes | TEXT | YES | | NULL | |
-| created_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| updated_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update |
-
-**Primary Key**: `id`
-
-**Foreign Keys**:
-
-- `software_id` → `software_products(id)` ON DELETE CASCADE
-- `unit_id` → `university_units(id)` ON DELETE CASCADE
-
-**Unique Constraints**:
-
-- `unique_software_unit` on `(software_id, unit_id)`
-
-**Indexes**:
-
-- `idx_status` on `status`
-- `idx_assignment_date` on `assignment_date`
-
----
-
-### audit_log Table
-
-Tracks all changes made to records across the system for audit and compliance purposes.
-
-| Field | Data Type | Null | Key | Default | Extra |
-|-------|-----------|------|-----|---------|-------|
-| id | INT | NO | PRI | NULL | auto_increment |
-| table_name | VARCHAR(100) | NO | MUL | NULL | |
-| record_id | INT | NO | | NULL | |
-| action | ENUM('INSERT','UPDATE','DELETE') | NO | MUL | NULL | |
-| old_values | JSON | YES | | NULL | |
-| new_values | JSON | YES | | NULL | |
-| changed_by | VARCHAR(100) | YES | | NULL | |
-| changed_at | TIMESTAMP | YES | MUL | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-
-**Primary Key**: `id`
-
-**Indexes**:
-
-- `idx_table_record` on `(table_name, record_id)`
-- `idx_action` on `action`
-- `idx_changed_at` on `changed_at`
-
----
-
 ## Views Reference
 
 The database includes three views that provide convenient access to commonly queried data:
@@ -287,8 +226,7 @@ Provides software counts per university unit, including active vs total software
 1. **Employees → Software Roles**: One-to-many relationship where employees can have multiple role assignments
 2. **Software Products → Software Roles**: One-to-one relationship where each software has exactly one role assignment record
 3. **Software Products ↔ Operating Systems**: Many-to-many relationship through `software_operating_systems`
-4. **Software Products ↔ University Units**: Many-to-many relationship through `software_unit_assignments`
-5. **University Units**: Self-referencing hierarchy through `parent_unit_id`
+4. **University Units**: Self-referencing hierarchy through `parent_unit_id`
 
 ### Cascade Behavior
 

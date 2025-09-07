@@ -108,7 +108,6 @@ The application uses a normalized MySQL database with the following key tables:
 - `software_products`: Software inventory with metadata
 - `university_units`: Organizational structure
 - `software_roles`: Role assignments linking employees to software products
-- `software_unit_assignments`: Many-to-many relationships between software and units
 - `operating_systems`: Supported operating systems
 - `software_operating_systems`: Software-OS compatibility mapping
 

@@ -128,6 +128,54 @@ class Database
     }
     
     /**
+     * Get table structure information
+     */
+    public function getTableStructure(string $tableName): array
+    {
+        try {
+            $stmt = $this->connection->prepare("DESCRIBE {$tableName}");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting table structure for {$tableName}: " . $e->getMessage());
+            throw new \Exception("Unable to retrieve table structure for {$tableName}");
+        }
+    }
+    
+    /**
+     * Get table data with pagination support
+     */
+    public function getTableData(string $tableName, int $limit = 100, int $offset = 0): array
+    {
+        try {
+            $stmt = $this->connection->prepare("SELECT * FROM {$tableName} LIMIT :limit OFFSET :offset");
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting table data for {$tableName}: " . $e->getMessage());
+            throw new \Exception("Unable to retrieve table data for {$tableName}");
+        }
+    }
+    
+    /**
+     * Get record count for a table
+     */
+    public function getTableRecordCount(string $tableName): int
+    {
+        try {
+            $stmt = $this->connection->prepare("SELECT COUNT(*) as count FROM {$tableName}");
+            $stmt->execute();
+            $result = $stmt->fetch();
+            return (int) $result['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting record count for {$tableName}: " . $e->getMessage());
+            throw new \Exception("Unable to retrieve record count for {$tableName}");
+        }
+    }
+    
+    /**
      * Convert PHP timezone to MySQL timezone offset
      */
     private function getMySQLTimezoneOffset(string $timezone): string

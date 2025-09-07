@@ -217,9 +217,8 @@ The application automatically:
 - **software_products**: Software inventory with metadata
 - **university_units**: Hierarchical organizational structure
 - **software_roles**: Role assignments and responsibilities
-- **software_unit_assignments**: Software-unit relationships
 - **operating_systems**: OS compatibility tracking
-- **audit_log**: Change tracking and compliance
+- **software_operating_systems**: Software-OS compatibility mapping
 
 For complete database documentation, see [DATABASE.md](DATABASE.md).
 

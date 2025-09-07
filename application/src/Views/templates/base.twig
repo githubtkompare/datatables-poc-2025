@@ -283,6 +283,21 @@
                 gap: 0.5rem;
             }
         }
+        
+        /* Table stat card hover effects */
+        .table-stat-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        
+        .table-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        a:has(.table-stat-card):hover {
+            text-decoration: none;
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -379,16 +394,6 @@
                         <li class="nav-item">
                             <a class="nav-link {{ page == 'admin' ? 'active' : '' }}" href="/admin">
                                 <i class="fas fa-cog me-2"></i>Administration
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ page == 'db-test' ? 'active' : '' }}" href="/admin/db-test">
-                                <i class="fas fa-database me-2"></i>DB Testing
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ page == 'performance-test' ? 'active' : '' }}" href="/admin/performance-test">
-                                <i class="fas fa-chart-line me-2"></i>Performance
                             </a>
                         </li>
                         {% endif %}

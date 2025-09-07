@@ -154,17 +154,9 @@ try {
         $controller = new AdminController();
         $controller->index();
         
-    } elseif ($path === '/admin/db-test') {
+    } elseif (preg_match('/^\/admin\/table\/(.+)$/', $path, $matches)) {
         $controller = new AdminController();
-        $controller->databaseTest();
-        
-    } elseif ($path === '/admin/db-test/run') {
-        $controller = new AdminController();
-        $controller->performDatabaseTest();
-        
-    } elseif ($path === '/admin/performance-test') {
-        $controller = new AdminController();
-        $controller->performanceTest();
+        $controller->viewTable($matches[1]);
         
     } elseif ($path === '/admin/toggle-admin') {
         $controller = new AdminController();
