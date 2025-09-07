@@ -1,0 +1,163 @@
+{% extends "base.twig" %}
+
+{% block page_actions %}
+    <div class="btn-toolbar">
+        <a href="/units/{{ unit.id }}" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to Unit
+        </a>
+        <a href="/units" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-1"></i>All Units
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-building me-2"></i>Edit Unit - {{ unit.unit_name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="/units/{{ unit.id }}/edit">
+                    <div class="mb-3">
+                        <label for="unit_name" class="form-label">
+                            Unit Name <span class="text-danger">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="unit_name" 
+                            name="unit_name" 
+                            value="{{ form_data.unit_name|default(unit.unit_name) }}"
+                            required
+                            maxlength="255"
+                            placeholder="e.g. College of Engineering, Computer Science Department"
+                        >
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="unit_code" class="form-label">Unit Code</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="unit_code" 
+                                    name="unit_code" 
+                                    value="{{ form_data.unit_code|default(unit.unit_code) }}"
+                                    maxlength="20"
+                                    placeholder="e.g. ENG, CS, BUS"
+                                    style="text-transform: uppercase;"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="unit_type" class="form-label">Unit Type</label>
+                                <select class="form-control" id="unit_type" name="unit_type">
+                                    <option value="">Select unit type...</option>
+                                    {% set current_type = form_data.unit_type|default(unit.unit_type) %}
+                                    {% if unit_types %}
+                                        {% for type in unit_types %}
+                                            <option value="{{ type.unit_type }}" 
+                                                {% if current_type == type.unit_type %}selected{% endif %}>
+                                                {{ type.display_name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="department" {% if current_type == 'department' %}selected{% endif %}>Department</option>
+                                        <option value="college" {% if current_type == 'college' %}selected{% endif %}>College</option>
+                                        <option value="administrative" {% if current_type == 'administrative' %}selected{% endif %}>Administrative</option>
+                                        <option value="support" {% if current_type == 'support' %}selected{% endif %}>Support</option>
+                                        <option value="research" {% if current_type == 'research' %}selected{% endif %}>Research</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="parent_unit_id" class="form-label">Parent Unit</label>
+                        <select class="form-control" id="parent_unit_id" name="parent_unit_id">
+                            <option value="">No parent unit (top-level unit)</option>
+                            {% set current_parent = form_data.parent_unit_id|default(unit.parent_unit_id) %}
+                            {% if all_units %}
+                                {% for unit_option in all_units %}
+                                    <option value="{{ unit_option.id }}" 
+                                        {% if current_parent == unit_option.id %}selected{% endif %}>
+                                        {% if unit_option.parent_unit_name %}{{ unit_option.parent_unit_name }} > {% endif %}{{ unit_option.unit_name }}
+                                        {% if unit_option.unit_code %} ({{ unit_option.unit_code }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <div class="form-text">Select a parent unit if this unit is a sub-unit of another</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea 
+                            class="form-control" 
+                            id="description" 
+                            name="description" 
+                            rows="3"
+                            maxlength="1000"
+                            placeholder="Brief description of the unit and its purpose"
+                        >{{ form_data.description|default(unit.description) }}</textarea>
+                    </div>
+
+                    <div class="d-grid d-md-flex gap-2">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i>Update Unit
+                        </button>
+                        <a href="/units/{{ unit.id }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Focus on unit name field
+    $('#unit_name').focus();
+    
+    // Auto-uppercase unit code
+    $('#unit_code').on('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+    
+    // Form validation
+    $('form').on('submit', function(e) {
+        var unitName = $('#unit_name').val().trim();
+        
+        if (!unitName) {
+            e.preventDefault();
+            alert('Please enter a unit name.');
+            $('#unit_name').focus();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

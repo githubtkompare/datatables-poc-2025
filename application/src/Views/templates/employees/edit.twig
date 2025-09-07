@@ -1,0 +1,177 @@
+{% extends "base.twig" %}
+
+{% block page_actions %}
+    <div class="btn-toolbar">
+        <a href="/employees/{{ employee.id }}" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to Employee
+        </a>
+        <a href="/employees" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-1"></i>All Employees
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-edit me-2"></i>Edit Employee - {{ employee.first_name }} {{ employee.last_name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="/employees/{{ employee.id }}/edit">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">
+                                    First Name <span class="text-danger">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="first_name" 
+                                    name="first_name" 
+                                    value="{{ form_data.first_name|default(employee.first_name) }}"
+                                    required
+                                    maxlength="100"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">
+                                    Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="last_name" 
+                                    name="last_name" 
+                                    value="{{ form_data.last_name|default(employee.last_name) }}"
+                                    required
+                                    maxlength="100"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            id="email" 
+                            name="email" 
+                            value="{{ form_data.email|default(employee.email) }}"
+                            required
+                            maxlength="255"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            class="form-control" 
+                            id="phone" 
+                            name="phone" 
+                            value="{{ form_data.phone|default(employee.phone) }}"
+                            maxlength="20"
+                            placeholder="e.g. (555) 123-4567"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="university_unit_id" class="form-label">
+                            University Unit <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="university_unit_id" name="university_unit_id" required>
+                            <option value="">Select a University Unit</option>
+                            {% for unit in university_units %}
+                                <option value="{{ unit.id }}" 
+                                    {% if (form_data.university_unit_id|default(employee.university_unit_id)) == unit.id %}selected{% endif %}>
+                                    {{ unit.unit_name }} 
+                                    {% if unit.unit_code %}({{ unit.unit_code }}){% endif %}
+                                    - {{ unit.unit_type|title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Choose the university unit this employee belongs to.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="job_title" class="form-label">Job Title</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="job_title" 
+                            name="job_title" 
+                            value="{{ form_data.job_title|default(employee.job_title) }}"
+                            maxlength="100"
+                            placeholder="e.g. Software Engineer, Project Manager"
+                        >
+                    </div>
+
+                    <div class="d-grid d-md-flex gap-2">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i>Update Employee
+                        </button>
+                        <a href="/employees/{{ employee.id }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Focus on first name field
+    $('#first_name').focus();
+    
+    // Form validation
+    $('form').on('submit', function(e) {
+        var firstName = $('#first_name').val().trim();
+        var lastName = $('#last_name').val().trim();
+        var email = $('#email').val().trim();
+        
+        if (!firstName || !lastName || !email) {
+            e.preventDefault();
+            alert('Please fill in all required fields (First Name, Last Name, and Email).');
+            return false;
+        }
+        
+        // Basic email validation
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            e.preventDefault();
+            alert('Please enter a valid email address.');
+            $('#email').focus();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

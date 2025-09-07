@@ -1,0 +1,260 @@
+{% extends "base.twig" %}
+
+{% set page = 'dashboard' %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Statistics Cards -->
+    <div class="col-md-4 mb-3">
+        <a href="/software" class="text-decoration-none">
+            <div class="card card-stats h-100" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" 
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-laptop-code fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-1 text-dark">Software Products</h5>
+                            <h3 class="text-success mb-0">{{ stats.total_software }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <span class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-arrow-right me-1"></i>View All
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <a href="/units" class="text-decoration-none">
+            <div class="card card-stats h-100" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" 
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-building fa-2x text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-1 text-dark">University Units</h5>
+                            <h3 class="text-info mb-0">{{ stats.total_units }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <span class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-arrow-right me-1"></i>View All
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <a href="/employees" class="text-decoration-none">
+            <div class="card card-stats h-100" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" 
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-1 text-dark">Total Employees</h5>
+                            <h3 class="text-primary mb-0">{{ stats.total_employees }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <span class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-right me-1"></i>View All
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="/software/create" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-laptop me-2"></i>Add Software Product
+                        </a>
+                    </div>
+                    {% if auth().is_admin %}
+                    <div class="col-md-4">
+                        <a href="/units/create" class="btn btn-info w-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-building me-2"></i>Add University Unit
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/employees/create" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-user-plus me-2"></i>Add New Employee
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Software -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-laptop-code me-2"></i>Recent Software
+                </h5>
+                <a href="/software" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_software %}
+                    <div class="list-group list-group-flush">
+                        {% for software in recent_software %}
+                            <a href="/software/{{ software.id }}" class="text-decoration-none">
+                                <div class="list-group-item px-3 py-3" style="cursor: pointer; transition: background-color 0.2s;" 
+                                     onmouseover="this.style.backgroundColor='#f8f9fa';" 
+                                     onmouseout="this.style.backgroundColor='';">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 text-dark">
+                                                {{ software.software_name }}
+                                            </h6>
+                                            {% if software.version %}
+                                                <p class="mb-1 text-muted small">v{{ software.version }}</p>
+                                            {% endif %}
+                                            {% if software.vendor_managed %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-building me-1"></i>{{ software.vendor_name }}
+                                                </small>
+                                            {% else %}
+                                                <small class="text-success">
+                                                    <i class="fas fa-home me-1"></i>Internal
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            {% if software.unit_count > 0 %}
+                                                <span class="badge bg-info">{{ software.unit_count }} units</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No software products found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent University Units -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-building me-2"></i>University Units
+                </h5>
+                <a href="/units" class="btn btn-sm btn-outline-info">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_units %}
+                    <div class="list-group list-group-flush">
+                        {% for unit in recent_units %}
+                            <a href="/units/{{ unit.id }}" class="text-decoration-none">
+                                <div class="list-group-item px-3 py-3" style="cursor: pointer; transition: background-color 0.2s;" 
+                                     onmouseover="this.style.backgroundColor='#f8f9fa';" 
+                                     onmouseout="this.style.backgroundColor='';">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 text-dark">
+                                                {{ unit.unit_name }}
+                                            </h6>
+                                            {% if unit.unit_code %}
+                                                <p class="mb-1 text-muted small">{{ unit.unit_code }}</p>
+                                            {% endif %}
+                                            <small class="text-muted">{{ unit.unit_type|title }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if unit.active_software_count > 0 %}
+                                                <span class="badge bg-success">{{ unit.active_software_count }} software</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No university units found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Employees -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Recent Employees
+                </h5>
+                <a href="/employees" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_employees %}
+                    <div class="list-group list-group-flush">
+                        {% for employee in recent_employees %}
+                            <a href="/employees/{{ employee.id }}" class="text-decoration-none">
+                                <div class="list-group-item px-3 py-3" style="cursor: pointer; transition: background-color 0.2s;" 
+                                     onmouseover="this.style.backgroundColor='#f8f9fa';" 
+                                     onmouseout="this.style.backgroundColor='';">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 text-dark">
+                                                {{ employee.first_name }} {{ employee.last_name }}
+                                            </h6>
+                                            <p class="mb-1 text-muted small">{{ employee.university_unit_name }}</p>
+                                            <small class="text-muted">{{ employee.job_title }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">
+                                                {% set total_roles = employee.business_owner_count + employee.technical_owner_count + employee.technical_manager_count %}
+                                                {% if total_roles > 0 %}
+                                                    <span class="badge bg-secondary">{{ total_roles }} roles</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No employees found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

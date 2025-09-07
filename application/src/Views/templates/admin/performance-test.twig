@@ -1,0 +1,214 @@
+{% extends "base.twig" %}
+
+{% block page_actions %}
+    <div class="btn-toolbar">
+        <a href="/admin" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Admin Dashboard
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Database Performance Testing
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Performance Testing</strong><br>
+                    Use the buttons below to run various database performance tests. These tests will measure query execution times and system performance.
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-database me-2"></i>Database Tests
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Test database connection, query performance, and data retrieval speeds.</p>
+                                <button type="button" class="btn btn-primary" onclick="runDatabaseTests()">
+                                    <i class="fas fa-play me-1"></i>Run Database Tests
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <i class="fas fa-chart-line me-2"></i>Query Performance
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Analyze complex query performance with joins and aggregations.</p>
+                                <button type="button" class="btn btn-success" onclick="runQueryTests()">
+                                    <i class="fas fa-play me-1"></i>Run Query Tests
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-white">
+                                <i class="fas fa-search me-2"></i>Search Performance
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Test search functionality and full-text search performance.</p>
+                                <button type="button" class="btn btn-warning" onclick="runSearchTests()">
+                                    <i class="fas fa-play me-1"></i>Run Search Tests
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Test Results
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="test-results">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-flask fa-2x mb-3 d-block"></i>
+                                <p class="mb-0">No tests run yet. Click a button above to start testing.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showLoading(testType) {
+    $('#test-results').html(`
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0">Running ${testType} tests...</p>
+        </div>
+    `);
+}
+
+function showError(error) {
+    $('#test-results').html(`
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Test Failed</strong><br>
+            ${error}
+        </div>
+    `);
+}
+
+function displayResults(results) {
+    let html = '<div class="table-responsive"><table class="table table-striped">';
+    html += '<thead><tr><th>Test</th><th>Duration</th><th>Status</th><th>Details</th></tr></thead>';
+    html += '<tbody>';
+    
+    // Handle different response structures
+    let testsData = {};
+    if (results.details && results.details.performance_tests) {
+        testsData = results.details.performance_tests;
+    } else if (results.details && results.details.search_tests) {
+        testsData = results.details.search_tests;
+    } else if (results.details && results.details.query_tests) {
+        testsData = results.details.query_tests;
+    } else if (results.performance_tests) {
+        testsData = results.performance_tests;
+    }
+    
+    for (const [testName, testResult] of Object.entries(testsData)) {
+        // Handle different field names
+        const duration = testResult.execution_time || testResult.duration || 'N/A';
+        const resultCount = testResult.result_count ? ` (${testResult.result_count} results)` : '';
+        const query = testResult.query || testResult.description || testResult.details || 'N/A';
+        
+        // All tests are considered successful if the parent response succeeded
+        const statusBadge = results.success 
+            ? '<span class="badge bg-success">Success</span>'
+            : '<span class="badge bg-danger">Failed</span>';
+        
+        html += `<tr>
+            <td>${testName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+            <td>${duration}</td>
+            <td>${statusBadge}</td>
+            <td><small class="text-muted">${query}${resultCount}</small></td>
+        </tr>`;
+    }
+    
+    html += '</tbody></table></div>';
+    
+    if (results.message) {
+        const alertClass = results.success ? 'success' : 'danger';
+        const iconClass = results.success ? 'check-circle' : 'exclamation-triangle';
+        
+        html = `<div class="alert alert-${alertClass}" role="alert">
+            <i class="fas fa-${iconClass} me-2"></i>
+            ${results.message}
+        </div>` + html;
+    }
+    
+    $('#test-results').html(html);
+}
+
+function runDatabaseTests() {
+    showLoading('database');
+    
+    $.ajax({
+        url: '/admin/db-test/run?type=performance',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            displayResults(response);
+        },
+        error: function(xhr, status, error) {
+            showError('Failed to run database tests: ' + error);
+        }
+    });
+}
+
+function runQueryTests() {
+    showLoading('query performance');
+    
+    $.ajax({
+        url: '/admin/db-test/run?type=queries',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            displayResults(response);
+        },
+        error: function(xhr, status, error) {
+            showError('Failed to run query tests: ' + error);
+        }
+    });
+}
+
+function runSearchTests() {
+    showLoading('search performance');
+    
+    $.ajax({
+        url: '/admin/db-test/run?type=search',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            displayResults(response);
+        },
+        error: function(xhr, status, error) {
+            showError('Failed to run search tests: ' + error);
+        }
+    });
+}
+</script>
+{% endblock %}

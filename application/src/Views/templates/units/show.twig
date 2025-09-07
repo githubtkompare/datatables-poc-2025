@@ -1,0 +1,158 @@
+{% extends "base.twig" %}
+
+{% block page_actions %}
+    <div class="btn-toolbar">
+        <a href="/units" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to Units
+        </a>
+        {% if auth().is_admin %}
+        <a href="/units/{{ unit.id }}/edit" class="btn btn-warning">
+            <i class="fas fa-edit me-1"></i>Edit Unit
+        </a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-building me-2"></i>Unit Information
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <strong>Name:</strong>
+            </div>
+            <div class="col-sm-9">
+                {{ unit.unit_name }}
+            </div>
+        </div>
+        
+        {% if unit.unit_code %}
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <strong>Code:</strong>
+            </div>
+            <div class="col-sm-9">
+                <code>{{ unit.unit_code }}</code>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if unit.unit_type %}
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <strong>Type:</strong>
+            </div>
+            <div class="col-sm-9">
+                <span class="badge bg-secondary">{{ unit.unit_type }}</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if unit.parent_unit_name %}
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <strong>Parent Unit:</strong>
+            </div>
+            <div class="col-sm-9">
+                <a href="/units/{{ unit.parent_unit_id }}" class="text-decoration-none">
+                    <i class="fas fa-building me-1"></i>{{ unit.parent_unit_name }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if unit.description %}
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <strong>Description:</strong>
+            </div>
+            <div class="col-sm-9">
+                {{ unit.description }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="row mb-0">
+            <div class="col-sm-3">
+                <strong>Created:</strong>
+            </div>
+            <div class="col-sm-9">
+                {{ unit.created_at|date('F j, Y') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-laptop-code me-2"></i>Assigned Software
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if unit_software and unit_software|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Vendor</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for software in unit_software %}
+                        <tr>
+                            <td>
+                                <a href="/software/{{ software.software_id }}" class="text-decoration-none">
+                                    <i class="fas fa-laptop-code me-1"></i>{{ software.software_name }}
+                                </a>
+                                {% if software.version %}
+                                    <small class="text-muted">({{ software.version }})</small>
+                                {% endif %}
+                                {% if software.business_owner %}
+                                    <br><small class="text-muted">Business Owner: {{ software.business_owner }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if software.vendor_managed and software.vendor_name %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-building me-1"></i>{{ software.vendor_name }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-home me-1"></i>Internal
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ software.created_at|date('M j, Y') }}
+                                </small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                <p class="mb-0">No software assigned to this unit</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if _GET.success %}
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        {{ _GET.success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
+{% endblock %}

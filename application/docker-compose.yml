@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datatables_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./src:/var/www/src
+      - ./composer.json:/var/www/composer.json
+      - ./vendor:/var/www/vendor
+    environment:
+      - DB_HOST=database
+      - DB_NAME=datatables_db
+      - DB_USER=datatables_user
+      - DB_PASSWORD=datatables_password
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - datatables_network
+
+  database:
+    image: mysql:8.0
+    container_name: datatables_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=datatables_db
+      - MYSQL_USER=datatables_user
+      - MYSQL_PASSWORD=datatables_password
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/sample-data.sql:/docker-entrypoint-initdb.d/02-sample-data.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+    networks:
+      - datatables_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: datatables_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=database
+      - PMA_USER=datatables_user
+      - PMA_PASSWORD=datatables_password
+      - MYSQL_ROOT_PASSWORD=root_password
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - datatables_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  datatables_network:
+    driver: bridge

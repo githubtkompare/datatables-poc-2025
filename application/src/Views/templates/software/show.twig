@@ -1,0 +1,219 @@
+{% extends "base.twig" %}
+
+{% block page_actions %}
+    <div class="btn-toolbar">
+        <a href="/software" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to Software
+        </a>
+        <a href="/software/{{ software.id }}/edit" class="btn btn-warning">
+            <i class="fas fa-edit me-1"></i>Edit Software
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-laptop-code me-2"></i>Software Information
+        </h5>
+    </div>
+    <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Name:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ software.software_name }}
+                    </div>
+                </div>
+                
+                {% if software.version %}
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Version:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        <code>{{ software.version }}</code>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if software.description %}
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Description:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ software.description }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Vendor Management:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {% if software.vendor_managed %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-building me-1"></i>Vendor Managed
+                            </span>
+                            {% if software.vendor_name %}
+                                <span class="ms-2 text-muted">({{ software.vendor_name }})</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-info">
+                                <i class="fas fa-users me-1"></i>Self Managed
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if software.license_type %}
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>License Type:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="badge bg-secondary">{{ software.license_type }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>University Unit:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {% if software.university_unit %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-building me-1"></i>{{ software.university_unit }}
+                            </span>
+                            {% if software.university_unit_code %}
+                                <span class="ms-2 text-muted">({{ software.university_unit_code }})</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Created:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ software.created_at|date('F j, Y') }}
+                    </div>
+                </div>
+                
+                <div class="row mb-0">
+                    <div class="col-sm-3">
+                        <strong>Last Updated:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ software.updated_at|date('F j, Y \a\t g:i A') }}
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-users me-2"></i>Role Assignments
+        </h5>
+    </div>
+    <div class="card-body">
+                {% if software.business_owner_first_name %}
+                    <div class="mb-3">
+                        <strong>Business Owner:</strong><br>
+                        <span class="badge bg-primary">
+                            <i class="fas fa-briefcase me-1"></i>
+                            <a href="/employees/{{ software.business_owner_id }}" class="text-white text-decoration-none">
+                                {{ software.business_owner_first_name }} {{ software.business_owner_last_name }}
+                            </a>
+                        </span>
+                        {% if software.business_owner_email %}
+                            <div class="small text-muted mt-1">
+                                <a href="mailto:{{ software.business_owner_email }}" class="text-muted">
+                                    {{ software.business_owner_email }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if software.technical_owner_first_name %}
+                    <div class="mb-3">
+                        <strong>Technical Owner:</strong><br>
+                        <span class="badge bg-success">
+                            <i class="fas fa-cog me-1"></i>
+                            <a href="/employees/{{ software.technical_owner_id }}" class="text-white text-decoration-none">
+                                {{ software.technical_owner_first_name }} {{ software.technical_owner_last_name }}
+                            </a>
+                        </span>
+                        {% if software.technical_owner_email %}
+                            <div class="small text-muted mt-1">
+                                <a href="mailto:{{ software.technical_owner_email }}" class="text-muted">
+                                    {{ software.technical_owner_email }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if software.technical_manager_first_name %}
+                    <div class="mb-0">
+                        <strong>Technical Manager:</strong><br>
+                        <span class="badge bg-info">
+                            <i class="fas fa-users-cog me-1"></i>
+                            <a href="/employees/{{ software.technical_manager_id }}" class="text-white text-decoration-none">
+                                {{ software.technical_manager_first_name }} {{ software.technical_manager_last_name }}
+                            </a>
+                        </span>
+                        {% if software.technical_manager_email %}
+                            <div class="small text-muted mt-1">
+                                <a href="mailto:{{ software.technical_manager_email }}" class="text-muted">
+                                    {{ software.technical_manager_email }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if not software.business_owner_first_name and not software.technical_owner_first_name and not software.technical_manager_first_name %}
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-user-slash fa-2x mb-2 d-block"></i>
+                        <p class="mb-0">No roles assigned</p>
+                    </div>
+                {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if software.operating_systems %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-desktop me-2"></i>Supported Operating Systems
+        </h5>
+    </div>
+    <div class="card-body">
+        {% for os in software.operating_systems %}
+            <span class="badge bg-primary me-2 mb-2">{{ os }}</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if _GET.success %}
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        {{ _GET.success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
+{% endblock %}
