@@ -6,7 +6,7 @@ use App\Controllers\BaseController;
 use App\Config\Auth;
 use App\Config\Database;
 
-class AdminController extends BaseController
+class AdminController_cleaned extends BaseController
 {
     private $db;
     
