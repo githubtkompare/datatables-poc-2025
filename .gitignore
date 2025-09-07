@@ -2,6 +2,27 @@
 backup_*.sql
 backup_*/
 
+# Dependency directories
+application/vendor/
+application/node_modules/
+vendor/
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Log files
+*.log
+logs/
+
+# Cache directories
+application/cache/
+application/tmp/
+cache/
+tmp/
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -16,3 +37,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Docker
+.docker/
