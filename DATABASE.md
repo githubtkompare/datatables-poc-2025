@@ -12,22 +12,20 @@ This document describes the MySQL database structure for the Software Product Tr
 
 ## Table Overview
 
-The database consists of 8 main tables and 3 views:
+The database consists of 6 main tables:
 
 ### Core Tables
 
-1. [employees](#employees-table) - Employee information
-2. [university_units](#university_units-table) - Organizational units
-3. [software_products](#software_products-table) - Software product catalog
+1. [university_units](#university_units-table) - Organizational units (created first due to foreign key dependencies)
+2. [employees](#employees-table) - Employee information with university unit association
+3. [software_products](#software_products-table) - Software product catalog with university unit association
 4. [operating_systems](#operating_systems-table) - Supported operating systems
 5. [software_operating_systems](#software_operating_systems-table) - Software-OS compatibility (many-to-many)
 6. [software_roles](#software_roles-table) - Software ownership and management roles
 
 ### Database Views
 
-- [v_software_with_roles](#v_software_with_roles) - Software with role assignments
-- [v_employee_roles](#v_employee_roles) - Employee role summaries
-- [v_unit_software_summary](#v_unit_software_summary) - Unit software counts
+None currently implemented. Previous views (v_software_with_roles, v_employee_roles, v_unit_software_summary) have been removed during schema migration.
 
 ---
 
@@ -35,7 +33,7 @@ The database consists of 8 main tables and 3 views:
 
 ### employees Table
 
-Stores employee information including contact details and organizational information.
+Stores employee information including contact details and organizational association with university units.
 
 | Field | Data Type | Null | Key | Default | Extra |
 |-------|-----------|------|-----|---------|-------|
@@ -44,7 +42,7 @@ Stores employee information including contact details and organizational informa
 | last_name | VARCHAR(100) | NO | MUL | NULL | |
 | email | VARCHAR(255) | NO | UNI | NULL | |
 | phone | VARCHAR(20) | YES | | NULL | |
-| department | VARCHAR(100) | YES | MUL | NULL | |
+| university_unit_id | INT | YES | MUL | NULL | |
 | job_title | VARCHAR(150) | YES | | NULL | |
 | created_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
 | updated_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update |
@@ -55,7 +53,11 @@ Stores employee information including contact details and organizational informa
 
 - `idx_email` on `email`
 - `idx_name` on `(last_name, first_name)`
-- `idx_department` on `department`
+- `idx_university_unit_id` on `university_unit_id`
+
+**Foreign Keys**:
+
+- `university_unit_id` → `university_units(id)` ON DELETE SET NULL
 
 **Relationships**: Referenced by `software_roles` table for role assignments.
 
@@ -96,7 +98,7 @@ Represents organizational units within the university (departments, colleges, et
 
 ### software_products Table
 
-Catalog of software products with vendor and licensing information.
+Catalog of software products with vendor and licensing information, associated with university units.
 
 | Field | Data Type | Null | Key | Default | Extra |
 |-------|-----------|------|-----|---------|-------|
@@ -104,12 +106,13 @@ Catalog of software products with vendor and licensing information.
 | software_name | VARCHAR(200) | NO | MUL | NULL | |
 | version | VARCHAR(50) | YES | | NULL | |
 | description | TEXT | YES | | NULL | |
-| vendor_managed | TINYINT(1) | YES | MUL | 0 | |
+| vendor_managed | BOOLEAN | YES | MUL | FALSE | |
 | vendor_name | VARCHAR(200) | YES | MUL | NULL | |
 | license_type | VARCHAR(100) | YES | | NULL | |
 | installation_notes | TEXT | YES | | NULL | |
 | created_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
 | updated_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update |
+| university_unit_id | INT | YES | MUL | NULL | |
 
 **Primary Key**: `id`
 
@@ -118,6 +121,11 @@ Catalog of software products with vendor and licensing information.
 - `idx_software_name` on `software_name`
 - `idx_vendor_managed` on `vendor_managed`
 - `idx_vendor_name` on `vendor_name`
+- `fk_software_university_unit` on `university_unit_id`
+
+**Foreign Keys**:
+
+- `university_unit_id` → `university_units(id)` ON DELETE SET NULL
 
 **Relationships**: Referenced by multiple tables for software associations.
 
@@ -174,15 +182,15 @@ Many-to-many relationship table mapping software products to compatible operatin
 
 ### software_roles Table
 
-Defines business and technical ownership roles for each software product.
+Defines business and technical ownership roles for each software product. All role fields are required.
 
 | Field | Data Type | Null | Key | Default | Extra |
 |-------|-----------|------|-----|---------|-------|
 | id | INT | NO | PRI | NULL | auto_increment |
-| software_id | INT | NO | UNI | NULL | |
-| business_owner_id | INT | YES | MUL | NULL | |
-| technical_owner_id | INT | YES | MUL | NULL | |
-| technical_manager_id | INT | YES | MUL | NULL | |
+| software_id | INT | NO | | NULL | |
+| business_owner_id | INT | NO | MUL | NULL | |
+| technical_owner_id | INT | NO | MUL | NULL | |
+| technical_manager_id | INT | NO | MUL | NULL | |
 | created_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
 | updated_at | TIMESTAMP | YES | | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update |
 
@@ -191,31 +199,17 @@ Defines business and technical ownership roles for each software product.
 **Foreign Keys**:
 
 - `software_id` → `software_products(id)` ON DELETE CASCADE
-- `business_owner_id` → `employees(id)` ON DELETE SET NULL
-- `technical_owner_id` → `employees(id)` ON DELETE SET NULL
-- `technical_manager_id` → `employees(id)` ON DELETE SET NULL
+- `business_owner_id` → `employees(id)` ON DELETE RESTRICT
+- `technical_owner_id` → `employees(id)` ON DELETE RESTRICT
+- `technical_manager_id` → `employees(id)` ON DELETE RESTRICT
 
-**Unique Constraints**:
-
-- `unique_software_roles` on `software_id` (one role record per software)
+**Note**: The unique constraint on `software_id` has been removed to allow multiple role instances for the same software. All role fields are now required (NOT NULL) and use RESTRICT on delete to prevent orphaning.
 
 ---
 
 ## Views Reference
 
-The database includes three views that provide convenient access to commonly queried data:
-
-### v_software_with_roles
-
-Combines software products with their assigned roles and employee details.
-
-### v_employee_roles
-
-Summarizes role counts per employee (business owner, technical owner, technical manager).
-
-### v_unit_software_summary
-
-Provides software counts per university unit, including active vs total software assignments.
+The database currently has no views implemented. Previous views (v_software_with_roles, v_employee_roles, v_unit_software_summary) have been removed during schema migration and cleanup.
 
 ---
 
@@ -223,19 +217,55 @@ Provides software counts per university unit, including active vs total software
 
 ### Primary Relationships
 
-1. **Employees → Software Roles**: One-to-many relationship where employees can have multiple role assignments
-2. **Software Products → Software Roles**: One-to-one relationship where each software has exactly one role assignment record
-3. **Software Products ↔ Operating Systems**: Many-to-many relationship through `software_operating_systems`
-4. **University Units**: Self-referencing hierarchy through `parent_unit_id`
+1. **Employees → University Units**: Many-to-one relationship where employees belong to organizational units
+2. **Software Products → University Units**: Many-to-one relationship where software is associated with organizational units
+3. **Employees → Software Roles**: One-to-many relationship where employees can have multiple role assignments
+4. **Software Products → Software Roles**: One-to-many relationship where each software can have multiple role assignment records (unique constraint removed)
+5. **Software Products ↔ Operating Systems**: Many-to-many relationship through `software_operating_systems`
+6. **University Units**: Self-referencing hierarchy through `parent_unit_id`
 
 ### Cascade Behavior
 
 - **ON DELETE CASCADE**: Deleting a software product will automatically remove all related records in junction tables
-- **ON DELETE SET NULL**: Deleting an employee or parent unit will set foreign key references to NULL rather than failing
+- **ON DELETE SET NULL**: Deleting a university unit will set foreign key references to NULL in employees and software_products tables
+- **ON DELETE RESTRICT**: Deleting an employee referenced in software_roles will be prevented to maintain data integrity
 
 ### Data Integrity
 
 - All tables use InnoDB engine for ACID compliance and foreign key support
-- Unique constraints prevent duplicate relationships
+- Unique constraints prevent duplicate relationships in junction tables
 - Enum fields constrain values to valid options
 - Timestamp fields automatically track creation and modification times
+- Required role assignments ensure all software has proper ownership defined
+
+---
+
+## Schema Migration History
+
+The database schema has undergone several migrations to reach its current state:
+
+### Migration Files Applied
+
+1. **`add_employee_university_unit.sql`**: Added `university_unit_id` column to the `employees` table with foreign key constraint to `university_units(id)`
+2. **`remove_department_column.sql`**: Removed the deprecated `department` column from the `employees` table after migrating to university unit associations
+3. **`cleanup_deprecated_objects.sql`**: Removed deprecated database objects including:
+   - Views: `v_software_with_roles`, `v_employee_roles`, `v_unit_software_summary`
+   - Tables: `software_unit_assignments`, `audit_log`
+
+### Key Schema Changes
+
+- **Employee Organization**: Migrated from a simple `department` varchar field to proper foreign key relationships with `university_units`
+- **Software Organization**: Software products are now directly associated with university units via `university_unit_id`
+- **Role Constraints**: Removed unique constraint on `software_roles.software_id` to allow multiple role instances per software
+- **Role Requirements**: All role fields in `software_roles` are now required (NOT NULL) with RESTRICT cascade behavior
+- **Simplified Structure**: Removed complex views and audit logging in favor of direct table relationships
+
+### Current State Summary
+
+The database is now in a simplified, normalized state with 6 core tables focused on:
+
+- Hierarchical organizational structure via `university_units`
+- Employee management with unit associations
+- Software product catalog with unit associations  
+- Operating system compatibility tracking
+- Required role assignments for software ownership
