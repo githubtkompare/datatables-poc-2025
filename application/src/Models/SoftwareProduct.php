@@ -6,10 +6,43 @@ use App\Config\Database;
 use PDO;
 use PDOException;
 
+/**
+ * Software Product model for managing software product data and operations
+ * 
+ * This model handles all database operations related to software products including
+ * CRUD operations, role assignments, operating system relationships, and advanced
+ * querying with filtering and sorting capabilities.
+ * 
+ * The model manages complex relationships between software products, employees
+ * (through role assignments), university units, and operating systems. All
+ * database operations use stored procedures for security and consistency.
+ * 
+ * Features:
+ * - Full CRUD operations for software product records
+ * - Role assignment management (business owner, technical owner, technical manager)
+ * - Operating system compatibility tracking
+ * - University unit association management
+ * - Advanced search and filtering capabilities
+ * - Vendor management and licensing information
+ * - Comprehensive error handling and logging
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class SoftwareProduct
 {
+    /**
+     * PDO database connection instance
+     * @var PDO
+     */
     private $db;
     
+    /**
+     * Initialize SoftwareProduct model with database connection
+     * 
+     * Establishes connection to the database through the Database singleton
+     * to ensure consistent connection handling across the application.
+     */
     public function __construct()
     {
         $this->db = Database::getInstance()->getConnection();

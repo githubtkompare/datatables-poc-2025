@@ -12,7 +12,7 @@ This document describes the MySQL database structure for the Software Product Tr
 
 ## Table Overview
 
-The database consists of 6 main tables:
+The database consists of 6 main tables with comprehensive stored procedure support:
 
 ### Core Tables
 
@@ -25,7 +25,11 @@ The database consists of 6 main tables:
 
 ### Database Views
 
-None currently implemented. Previous views (v_software_with_roles, v_employee_roles, v_unit_software_summary) have been removed during schema migration.
+No views are currently implemented. Previous views (v_software_with_roles, v_employee_roles, v_unit_software_summary) have been removed during schema migration in favor of stored procedures.
+
+### Database Procedures
+
+The database includes 24 comprehensive stored procedures. See the [Stored Procedures](#stored-procedures) section below for complete details.
 
 ---
 
@@ -210,6 +214,78 @@ Defines business and technical ownership roles for each software product. All ro
 ## Views Reference
 
 The database currently has no views implemented. Previous views (v_software_with_roles, v_employee_roles, v_unit_software_summary) have been removed during schema migration and cleanup.
+
+---
+
+## Stored Procedures
+
+The database includes 24 comprehensive stored procedures for enhanced security, performance, and maintainability:
+
+### Employee Procedures
+
+- `sp_get_all_employees` - Paginated employee listing with search and sorting
+- `sp_get_employee_by_id` - Individual employee details
+- `sp_get_employee_software_roles` - Employee's software role assignments
+- `sp_create_employee` - Create new employee record
+- `sp_update_employee` - Update existing employee
+- `sp_delete_employee` - Delete employee record
+- `sp_get_employee_total_count` - Total employee count for pagination
+
+### Software Procedures
+
+- `sp_get_all_software` - Paginated software listing with search and sorting
+- `sp_get_software_by_id` - Individual software product details
+- `sp_get_software_operating_systems` - Software OS compatibility
+- `sp_get_software_unit` - Software university unit association
+- `sp_create_software` - Create new software product
+- `sp_update_software` - Update existing software product
+- `sp_delete_software` - Delete software product
+- `sp_get_software_total_count` - Total software count for pagination
+- `sp_get_unique_software_names` - Autocomplete suggestions
+
+### University Unit Procedures
+
+- `sp_get_all_units` - Paginated unit listing with search and sorting
+- `sp_get_unit_by_id` - Individual unit details
+- `sp_get_unit_software` - Unit's associated software products
+- `sp_create_unit` - Create new university unit
+- `sp_update_unit` - Update existing unit
+- `sp_delete_unit` - Delete university unit
+- `sp_get_unit_total_count` - Total unit count for pagination
+- `sp_get_all_units_for_dropdown` - Units for form dropdowns
+
+### Key Features
+
+The stored procedures implement:
+
+- **Pagination**: `LIMIT` and `OFFSET` for efficient data retrieval
+- **Search**: Dynamic filtering across relevant fields
+- **Sorting**: Flexible ordering by column with ASC/DESC support
+- **Security**: Parameter binding to prevent SQL injection
+- **Consistency**: Standardized input/output patterns across all procedures
+- **Validation**: Comprehensive error handling and data validation
+
+### Data Relationships
+
+- **employees** → **employee_software_roles** (One-to-Many): Employee software assignments
+- **software_products** → **employee_software_roles** (One-to-Many): Software role assignments
+- **software_products** → **software_operating_systems** (One-to-Many): OS compatibility
+- **university_units** → **software_products** (One-to-Many): Unit software ownership
+- **employees** ↔ **university_units** (Many-to-Many via roles): Employee unit associations
+
+## Security Considerations
+
+- All user inputs are processed through stored procedures with parameter binding
+- No direct SQL queries are executed from the application layer
+- Stored procedures provide an additional security boundary
+- Input validation is handled at both application and database levels
+
+## Performance Optimization
+
+- Indexed columns for efficient searching and sorting
+- Stored procedures reduce network overhead
+- Prepared statement benefits through procedure reuse
+- Optimized queries for common operations like pagination and search
 
 ---
 

@@ -24,7 +24,6 @@ datatables-poc-2025/
 ├── REQUIREMENTS.md             # Detailed business and technical requirements
 ├── LICENSE                     # CC0 1.0 Universal License
 └── application/               # Main application directory
-    ├── README.md              # Application-specific documentation
     ├── docker-compose.yml     # Docker services configuration
     ├── Dockerfile             # Application container configuration
     ├── composer.json          # PHP dependency management
@@ -128,11 +127,7 @@ The application automatically:
 
 #### 🏢 **Employee Management**
 
-- Complete CRUD operations for university staff
-- University unit association (instead of simple department text)
-- Job title and contact information management
-- Interactive DataTables with search and filtering
-- Role assignment relationships tracking
+ University unit association (replaces the deprecated department field)
 
 #### 💻 **Software Product Management**
 
@@ -194,7 +189,21 @@ The application automatically:
 - **Admin Authentication**: Secure access to database inspection tools
 - **Responsive Design**: Mobile-friendly admin interface
 
-#### 📊 **System Dashboard**
+#### 📊 **Database Testing Suite** (`/admin/db-test`)
+
+- **Connection Tests**: Multi-connection testing with performance metrics
+- **Performance Tests**: Query execution time analysis
+- **Table Integrity**: Foreign key constraint validation
+- **Complex Query Tests**: View and aggregation performance testing
+
+#### 🔍 **Performance Monitoring** (`/admin/performance-test`)
+
+- Real-time query performance monitoring
+- Database response time analysis
+- Resource utilization tracking
+- Export capabilities for test results and data
+
+#### 🏠 **System Dashboard**
 
 - Live database table statistics
 - Quick navigation to table inspection views  
@@ -226,12 +235,12 @@ For complete database documentation, see [DATABASE.md](DATABASE.md).
 
 The application includes realistic sample data representing:
 
-- **15 Employees** across various university departments with proper unit associations
-- **14 Software Products** (mix of vendor-managed and internal) with university unit assignments
-- **10 University Units** representing academic and administrative departments in hierarchical structure
-- **Complete Role Assignments** with business owners, technical owners, and technical managers
-- **OS Compatibility Matrix** showing software-operating system relationships
-- **Cross-departmental Usage Patterns** demonstrating real-world organizational complexity
+ **15 Employees** across various university units with proper unit associations
+ **14 Software Products** (mix of vendor-managed and internal) with university unit assignments
+ **10 University Units** representing academic and administrative units in hierarchical structure
+ **Complete Role Assignments** with business owners, technical owners, and technical managers
+ **OS Compatibility Matrix** showing software-operating system relationships
+ **Cross-unit Usage Patterns** demonstrating real-world organizational complexity
 
 ## 🔧 Configuration & Customization
 
@@ -240,21 +249,27 @@ The application includes realistic sample data representing:
 Create a `.env` file in the `application/` directory with the following settings (use `.env.example` as a template):
 
 ```bash
-# Database Settings
+# Database Configuration
 DB_HOST=database
 DB_NAME=datatables_db
 DB_USER=datatables_user
 DB_PASSWORD=datatables_password
 
-# Application Settings
+# Application Configuration
 APP_ENV=development
 APP_DEBUG=true
+APP_URL=http://localhost:8080
 APP_TIMEZONE=America/Chicago
+
+# MySQL Root Password
+MYSQL_ROOT_PASSWORD=root_password
 ```
 
 **Note**: The `.env` file is excluded from version control for security. Copy from `.env.example` and customize for your environment.
 
 ### Docker Services
+
+The application uses three main Docker services:
 
 - **Web Container**: Apache + PHP 8.3 + Application code
 - **Database Container**: MySQL 8.0 with persistent storage
@@ -299,12 +314,26 @@ APP_TIMEZONE=America/Chicago
    {% extends "base.twig" %}
    ```
 
+5. **Update Routing**
+
+   ```php
+   // Update routing in public/index.php
+   ```
+
 ### Development Workflow
 
 1. Make changes to source code
 2. Restart containers if needed: `docker-compose restart web`
 3. Test changes in browser
 4. Check logs: `docker-compose logs web`
+
+### Database Changes
+
+For structural database changes:
+
+1. Update `database/schema.sql` for structural changes
+2. Modify `database/sample-data.sql` for new sample data
+3. Rebuild containers: `docker-compose down && docker-compose up -d --build`
 
 ## 📈 Performance Considerations
 
@@ -340,6 +369,42 @@ APP_TIMEZONE=America/Chicago
 - Admin-only functionality segregation
 - Secure database connections
 
+## 🚀 Production Deployment
+
+For production deployment considerations:
+
+1. **Environment Configuration**
+   - Update environment variables for production
+   - Set `APP_DEBUG=false` in `.env`
+   - Configure proper database credentials
+
+2. **Security Hardening**
+   - Configure SSL/TLS certificates
+   - Implement proper security measures
+   - Set up secure backup procedures
+   - Configure monitoring and logging
+
+3. **Performance Optimization**
+   - Enable production caching
+   - Configure proper resource limits
+   - Set up load balancing if needed
+   - Implement CDN for static assets
+
+4. **Maintenance**
+   - Regular security updates
+   - Database backup strategies
+   - Log rotation and monitoring
+   - Performance monitoring and alerting
+
+### Security Considerations
+
+- Input validation and sanitization throughout the application
+- All database queries use prepared statements
+- Environment variables protect sensitive configuration
+- HTTPS configuration strongly recommended for production
+- Regular security updates and dependency management
+- Compliance with institutional security policies
+
 ## 🐛 Troubleshooting
 
 ### Common Issues & Solutions
@@ -353,8 +418,10 @@ docker-compose ps
 # View database logs
 docker-compose logs database
 
-# Restart database service
+# Ensure Docker services are running
 docker-compose restart database
+
+# Verify environment variables in .env
 ```
 
 #### Performance Issues
@@ -373,11 +440,38 @@ docker-compose restart
 #### Development Issues
 
 ```bash
-# Rebuild containers
+# Rebuild containers (missing dependencies)
 docker-compose down && docker-compose up -d --build
 
 # Clear all containers and start fresh
 docker-compose down -v && docker-compose up -d
+
+# Reset container permissions
+docker-compose down && docker-compose up -d
+```
+
+#### Composer Dependencies Missing
+
+```bash
+# Rebuild the web container
+docker-compose up -d --build web
+```
+
+### Useful Development Commands
+
+```bash
+# View logs
+docker-compose logs web
+docker-compose logs database
+
+# Restart services
+docker-compose restart
+
+# Access web container
+docker-compose exec web bash
+
+# Access MySQL directly
+docker-compose exec database mysql -u datatables_user -p datatables_db
 ```
 
 ### Debug Mode
@@ -388,7 +482,6 @@ Enable detailed error reporting by setting `APP_DEBUG=true` in the environment c
 
 - **[DATABASE.md](DATABASE.md)**: Complete database schema documentation
 - **[REQUIREMENTS.md](REQUIREMENTS.md)**: Detailed business and technical requirements
-- **[application/README.md](application/README.md)**: Application-specific documentation
 
 ## 📄 License
 

@@ -1,8 +1,9 @@
 -- Sample Data for Software Product Tracking System
--- Updated to reflect new requirements:
+-- Updated to reflect current schema:
 -- 1. Each software has exactly one business owner, technical owner, and technical manager
 -- 2. Multiple instances of same software are allowed
--- 3. Software university unit determined by business owner's department
+-- 3. Software university unit determined by university_unit_id foreign key
+-- 4. Employees are associated with university units via university_unit_id
 
 USE datatables_db;
 
@@ -30,23 +31,23 @@ INSERT INTO university_units (unit_name, unit_code, description, unit_type) VALU
 ('Student Services', 'SS', 'Student Affairs and Support Services', 'support'),
 ('Research Computing', 'RC', 'High Performance Computing and Research Support', 'research');
 
--- Insert Employees with departments matching university units
-INSERT INTO employees (first_name, last_name, email, phone, department, job_title) VALUES
-('Sarah', 'Johnson', 'sarah.johnson@university.edu', '555-0101', 'IT Services', 'IT Director'),
-('Michael', 'Chen', 'michael.chen@university.edu', '555-0102', 'Computer Science Department', 'Professor'),
-('Emily', 'Rodriguez', 'emily.rodriguez@university.edu', '555-0103', 'Biology Department', 'Associate Professor'),
-('David', 'Thompson', 'david.thompson@university.edu', '555-0104', 'IT Services', 'Systems Administrator'),
-('Jessica', 'Williams', 'jessica.williams@university.edu', '555-0105', 'Mathematics Department', 'Department Chair'),
-('Robert', 'Davis', 'robert.davis@university.edu', '555-0106', 'IT Services', 'Database Administrator'),
-('Amanda', 'Miller', 'amanda.miller@university.edu', '555-0107', 'Human Resources', 'HR Manager'),
-('Christopher', 'Wilson', 'christopher.wilson@university.edu', '555-0108', 'Finance Department', 'Finance Director'),
-('Lisa', 'Anderson', 'lisa.anderson@university.edu', '555-0109', 'Research Computing', 'Research Computing Manager'),
-('Kevin', 'Taylor', 'kevin.taylor@university.edu', '555-0110', 'Chemistry Department', 'Lab Manager'),
-('Dr. James', 'Peterson', 'james.peterson@university.edu', '555-0111', 'Biology Department', 'Professor'),
-('Maria', 'Garcia', 'maria.garcia@university.edu', '555-0112', 'Computer Science Department', 'Associate Professor'),
-('John', 'Smith', 'john.smith@university.edu', '555-0113', 'Mathematics Department', 'Professor'),
-('Anna', 'Brown', 'anna.brown@university.edu', '555-0114', 'Chemistry Department', 'Research Coordinator'),
-('Tom', 'Lee', 'tom.lee@university.edu', '555-0115', 'University Library', 'Systems Librarian');
+-- Insert Employees with university unit associations
+INSERT INTO employees (first_name, last_name, email, phone, university_unit_id, job_title) VALUES
+('Sarah', 'Johnson', 'sarah.johnson@university.edu', '555-0101', 5, 'IT Director'),
+('Michael', 'Chen', 'michael.chen@university.edu', '555-0102', 1, 'Professor'),
+('Emily', 'Rodriguez', 'emily.rodriguez@university.edu', '555-0103', 2, 'Associate Professor'),
+('David', 'Thompson', 'david.thompson@university.edu', '555-0104', 5, 'Systems Administrator'),
+('Jessica', 'Williams', 'jessica.williams@university.edu', '555-0105', 3, 'Department Chair'),
+('Robert', 'Davis', 'robert.davis@university.edu', '555-0106', 5, 'Database Administrator'),
+('Amanda', 'Miller', 'amanda.miller@university.edu', '555-0107', 6, 'HR Manager'),
+('Christopher', 'Wilson', 'christopher.wilson@university.edu', '555-0108', 7, 'Finance Director'),
+('Lisa', 'Anderson', 'lisa.anderson@university.edu', '555-0109', 10, 'Research Computing Manager'),
+('Kevin', 'Taylor', 'kevin.taylor@university.edu', '555-0110', 4, 'Lab Manager'),
+('Dr. James', 'Peterson', 'james.peterson@university.edu', '555-0111', 2, 'Professor'),
+('Maria', 'Garcia', 'maria.garcia@university.edu', '555-0112', 1, 'Associate Professor'),
+('John', 'Smith', 'john.smith@university.edu', '555-0113', 3, 'Professor'),
+('Anna', 'Brown', 'anna.brown@university.edu', '555-0114', 4, 'Research Coordinator'),
+('Tom', 'Lee', 'tom.lee@university.edu', '555-0115', 8, 'Systems Librarian');
 
 -- Insert Software Products with university_unit_id determined by business owner's department
 INSERT INTO software_products (software_name, version, description, vendor_managed, vendor_name, license_type, university_unit_id) VALUES

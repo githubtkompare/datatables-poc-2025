@@ -1,31 +1,56 @@
 <?php
 
-// Load environment variables
+/**
+ * Main application entry point and router
+ * 
+ * This file serves as the central entry point for all HTTP requests to the
+ * DataTables POC application. It handles environment configuration, autoloading,
+ * session management, and URL routing to appropriate controllers.
+ * 
+ * Features:
+ * - Environment variable loading and configuration
+ * - Timezone configuration with fallback
+ * - Custom autoloader for application classes
+ * - Simple but effective URL routing system
+ * - Centralized error handling and logging
+ * - Session management initialization
+ * 
+ * The router uses pattern matching to direct requests to appropriate controllers
+ * and actions, supporting both simple paths and parameterized routes with
+ * regular expressions.
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
+
+// Load environment variables from .env file if available
 if (file_exists(__DIR__ . '/../.env')) {
     $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
+        // Skip comment lines
         if (strpos(trim($line), '#') === 0) {
             continue;
         }
+        // Parse key=value pairs and set as environment variables
         list($name, $value) = explode('=', $line, 2);
         $_ENV[trim($name)] = trim($value);
         putenv(trim($name) . '=' . trim($value));
     }
 }
 
-// Set timezone
+// Set application timezone with fallback to Central Time
 $timezone = $_ENV['APP_TIMEZONE'] ?? 'America/Chicago';
 if (!date_default_timezone_set($timezone)) {
-    // Fallback to Chicago if the timezone is invalid
+    // Fallback to Chicago if the specified timezone is invalid
     date_default_timezone_set('America/Chicago');
 }
 
-// Include Composer autoloader when available
+// Include Composer autoloader when available for vendor dependencies
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
 }
 
-// Set error reporting based on environment
+// Configure error reporting based on environment debug setting
 if (($_ENV['APP_DEBUG'] ?? 'false') === 'true') {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -34,33 +59,49 @@ if (($_ENV['APP_DEBUG'] ?? 'false') === 'true') {
     ini_set('display_errors', 0);
 }
 
-// Start session
+// Initialize session for authentication and state management
 session_start();
 
-// Simple router
+// Parse the incoming request URI for routing
 $request_uri = $_SERVER['REQUEST_URI'];
 $path = parse_url($request_uri, PHP_URL_PATH);
 $path = rtrim($path, '/') ?: '/';
 
-// Import controllers (temporary until Composer autoload is working)
+/**
+ * Custom autoloader function for application classes
+ * 
+ * Provides PSR-4 compatible autoloading for application classes when
+ * Composer autoloader is not available. Maps namespace paths to file
+ * system paths within the src directory.
+ * 
+ * @param string $className Fully qualified class name to load
+ * @return void
+ */
 function loadClass($className) {
     $className = ltrim($className, '\\');
     $fileName = '';
+    
+    // Parse namespace and convert to directory structure
     if ($lastNsPos = strrpos($className, '\\')) {
         $namespace = substr($className, 0, $lastNsPos);
         $className = substr($className, $lastNsPos + 1);
         $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
     }
-    $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+    
+    // Add class name and .php extension (PSR-4 standard)
+    $fileName .= $className . '.php';
     $fullPath = __DIR__ . '/../src/' . $fileName;
     
+    // Include the file if it exists
     if (file_exists($fullPath)) {
         require_once $fullPath;
     }
 }
 
+// Register the custom autoloader
 spl_autoload_register('loadClass');
 
+// Import required controller classes and configuration
 use App\Controllers\HomeController;
 use App\Controllers\EmployeeController;
 use App\Controllers\SoftwareController;
@@ -69,11 +110,14 @@ use App\Controllers\AdminController;
 use App\Config\Auth;
 
 try {
-    // Route handling
+    // URL routing system - maps request paths to controller actions
+    
+    // Home and dashboard routes
     if ($path === '/' || $path === '/home') {
         $controller = new HomeController();
         $controller->index();
         
+    // Employee management routes
     } elseif ($path === '/employees') {
         $controller = new EmployeeController();
         $controller->index();

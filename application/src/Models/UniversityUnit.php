@@ -6,10 +6,43 @@ use App\Config\Database;
 use PDO;
 use PDOException;
 
+/**
+ * University Unit model for managing organizational unit data and operations
+ * 
+ * This model handles all database operations related to university units including
+ * CRUD operations, hierarchical relationships, software associations, and employee
+ * assignments. It manages the organizational structure within the university system.
+ * 
+ * University units can have parent-child relationships creating an organizational
+ * hierarchy, and they serve as organizational containers for employees and
+ * software product assignments.
+ * 
+ * Features:
+ * - Full CRUD operations for university unit records
+ * - Hierarchical unit management (parent-child relationships)
+ * - Software product association tracking
+ * - Employee assignment management
+ * - Advanced querying with search, sorting, and pagination
+ * - Unit type categorization (department, college, etc.)
+ * - Comprehensive error handling and logging
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class UniversityUnit
 {
+    /**
+     * PDO database connection instance
+     * @var PDO
+     */
     private $db;
     
+    /**
+     * Initialize UniversityUnit model with database connection
+     * 
+     * Establishes connection to the database through the Database singleton
+     * to ensure consistent connection handling across the application.
+     */
     public function __construct()
     {
         $this->db = Database::getInstance()->getConnection();
