@@ -127,7 +127,7 @@ The application automatically:
 
 #### 🏢 **Employee Management**
 
- University unit association (replaces the deprecated department field)
+- University unit association (replaces the deprecated department field)
 
 #### 💻 **Software Product Management**
 
