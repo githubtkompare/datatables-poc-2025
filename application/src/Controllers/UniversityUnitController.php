@@ -6,16 +6,53 @@ use App\Config\TwigConfig;
 use App\Config\Auth;
 use App\Models\UniversityUnit;
 
+/**
+ * University unit management controller for organizational structure
+ * 
+ * Handles all university unit functionality including listing, viewing,
+ * creating, editing, and deleting organizational units. Manages hierarchical
+ * relationships between units and tracks associated software products and employees.
+ * 
+ * Features:
+ * - DataTables integration with server-side processing
+ * - University unit CRUD operations with admin authorization
+ * - Hierarchical unit relationship management
+ * - Software product association tracking
+ * - Employee count tracking per unit
+ * - Comprehensive error handling and logging
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class UniversityUnitController extends BaseController
 {
+    /**
+     * University unit model instance for database operations
+     * @var UniversityUnit
+     */
     private $unitModel;
     
+    /**
+     * Initialize UniversityUnitController with required model
+     * 
+     * Sets up the controller with UniversityUnit model for comprehensive
+     * organizational unit management functionality.
+     */
     public function __construct()
     {
         parent::__construct();
         $this->unitModel = new UniversityUnit();
     }
     
+    /**
+     * Display the university units listing page
+     * 
+     * Renders the main university units index page with DataTables integration.
+     * The actual data loading is handled by getUnitsData() method for
+     * server-side processing and performance optimization.
+     * 
+     * @return void Renders units index template or error page
+     */
     public function index()
     {
         try {
@@ -35,6 +72,15 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * API endpoint for DataTables university unit data
+     * 
+     * Provides server-side data processing for the units DataTable including
+     * pagination, sorting, searching, and filtering. Returns JSON formatted data
+     * with unit information, hierarchical relationships, and associated counts.
+     * 
+     * @return void Outputs JSON response with DataTables formatted data
+     */
     public function getUnitsData()
     {
         header('Content-Type: application/json');
@@ -110,6 +156,16 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Display individual university unit details
+     * 
+     * Shows comprehensive university unit information including basic details,
+     * hierarchical relationships, assigned software products, and employee counts.
+     * Provides complete overview for organizational unit management.
+     * 
+     * @param int $id University unit ID to display
+     * @return void Renders unit detail template or error page
+     */
     public function show($id)
     {
         try {
@@ -144,6 +200,15 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Display university unit creation form or process form submission
+     * 
+     * Handles both GET requests (show form) and POST requests (process form).
+     * Requires administrator privileges for access. Loads parent units for
+     * hierarchical relationship dropdown selection.
+     * 
+     * @return void Renders creation form, processes submission, or shows error
+     */
     public function create()
     {
         // Require admin authentication
@@ -183,6 +248,15 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Process university unit creation form submission
+     * 
+     * Validates form data, creates new university unit record, and handles
+     * success/error responses. Requires administrator privileges and includes
+     * comprehensive validation for required fields and hierarchical relationships.
+     * 
+     * @return void Redirects on success or renders form with errors
+     */
     public function store()
     {
         try {
@@ -247,6 +321,16 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Display university unit edit form or process form submission
+     * 
+     * Handles both GET requests (show populated form) and POST requests (process form).
+     * Requires administrator privileges and loads existing unit data for editing.
+     * Includes parent unit dropdown population for hierarchical management.
+     * 
+     * @param int $id University unit ID to edit
+     * @return void Renders edit form, processes submission, or shows error
+     */
     public function edit($id)
     {
         // Require admin authentication
@@ -304,6 +388,16 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Process university unit update form submission
+     * 
+     * Validates form data, updates existing university unit record, and handles
+     * success/error responses. Requires administrator privileges and includes
+     * comprehensive validation for required fields and hierarchical relationships.
+     * 
+     * @param int $id University unit ID to update
+     * @return void Redirects on success or renders form with errors
+     */
     public function update($id)
     {
         // Require admin authentication
@@ -396,6 +490,15 @@ class UniversityUnitController extends BaseController
         }
     }
     
+    /**
+     * Delete university unit record via AJAX request
+     * 
+     * Processes DELETE requests to remove university unit records from the
+     * database. Returns JSON response indicating success or failure status.
+     * Handles referential integrity with employees and software products.
+     * 
+     * @return void Outputs JSON response with deletion status
+     */
     public function delete()
     {
         header('Content-Type: application/json');

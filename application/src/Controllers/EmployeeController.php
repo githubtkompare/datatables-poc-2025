@@ -6,11 +6,45 @@ use App\Config\Auth;
 use App\Models\Employee;
 use App\Models\UniversityUnit;
 
+/**
+ * Employee management controller for CRUD operations and data display
+ * 
+ * Handles all employee-related functionality including listing, viewing,
+ * creating, editing, and deleting employee records. Integrates with DataTables
+ * for dynamic data display and includes comprehensive validation and
+ * authorization controls.
+ * 
+ * Features:
+ * - DataTables integration with server-side processing
+ * - Employee CRUD operations with admin authorization
+ * - University unit association management
+ * - Software role assignment tracking
+ * - Advanced search and filtering capabilities
+ * - Comprehensive error handling and logging
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class EmployeeController extends BaseController
 {
+    /**
+     * Employee model instance for database operations
+     * @var Employee
+     */
     private $employeeModel;
+    
+    /**
+     * University unit model instance for unit data
+     * @var UniversityUnit
+     */
     private $unitModel;
     
+    /**
+     * Initialize EmployeeController with required models
+     * 
+     * Sets up the controller with Employee and UniversityUnit models
+     * for comprehensive employee management functionality.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -18,6 +52,15 @@ class EmployeeController extends BaseController
         $this->unitModel = new UniversityUnit();
     }
     
+    /**
+     * Display the employee listing page
+     * 
+     * Renders the main employee index page with DataTables integration.
+     * The actual data loading is handled by getEmployeesData() method
+     * for server-side processing.
+     * 
+     * @return void Renders employee index template or error page
+     */
     public function index()
     {
         try {
@@ -37,6 +80,15 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * API endpoint for DataTables employee data
+     * 
+     * Provides server-side data processing for the employee DataTable including
+     * pagination, sorting, searching, and filtering. Returns JSON formatted data
+     * with employee information and role assignment counts.
+     * 
+     * @return void Outputs JSON response with DataTables formatted data
+     */
     public function getEmployeesData()
     {
         header('Content-Type: application/json');
@@ -117,6 +169,16 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Display individual employee details
+     * 
+     * Shows comprehensive employee information including personal details,
+     * university unit association, and software role assignments. Includes
+     * counts of software products managed in different roles.
+     * 
+     * @param int $id Employee ID to display
+     * @return void Renders employee detail template or error page
+     */
     public function show($id)
     {
         try {
@@ -151,6 +213,15 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Display employee creation form or process form submission
+     * 
+     * Handles both GET requests (show form) and POST requests (process form).
+     * Requires administrator privileges for access. Loads university units
+     * for dropdown selection and includes comprehensive validation.
+     * 
+     * @return void Renders creation form, processes submission, or shows error
+     */
     public function create()
     {
         // Check if user is admin
@@ -189,6 +260,15 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Process employee creation form submission
+     * 
+     * Validates form data, creates new employee record, and handles success/error
+     * responses. Requires administrator privileges and includes comprehensive
+     * data validation including email format and required fields.
+     * 
+     * @return void Redirects on success or renders form with errors
+     */
     public function store()
     {
         // Check if user is admin
@@ -264,6 +344,16 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Display employee edit form or process form submission
+     * 
+     * Handles both GET requests (show populated form) and POST requests (process form).
+     * Requires administrator privileges and loads existing employee data for editing.
+     * Includes university unit dropdown population.
+     * 
+     * @param int $id Employee ID to edit
+     * @return void Renders edit form, processes submission, or shows error
+     */
     public function edit($id)
     {
         // Check if user is admin
@@ -314,6 +404,16 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Process employee update form submission
+     * 
+     * Validates form data, updates existing employee record, and handles success/error
+     * responses. Requires administrator privileges and includes comprehensive
+     * data validation including email format and required fields.
+     * 
+     * @param int $id Employee ID to update
+     * @return void Redirects on success or renders form with errors
+     */
     public function update($id)
     {
         // Check if user is admin
@@ -392,6 +492,15 @@ class EmployeeController extends BaseController
         }
     }
     
+    /**
+     * Delete employee record via AJAX request
+     * 
+     * Processes DELETE requests to remove employee records from the database.
+     * Requires administrator privileges and POST request method. Returns JSON
+     * response indicating success or failure status.
+     * 
+     * @return void Outputs JSON response with deletion status
+     */
     public function delete()
     {
         // Check if user is admin

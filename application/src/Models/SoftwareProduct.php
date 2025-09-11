@@ -255,6 +255,16 @@ class SoftwareProduct
         }
     }
     
+    /**
+     * Retrieve unique software versions for autocomplete functionality
+     * 
+     * Returns distinct software versions matching the optional search term.
+     * Used for version field autocomplete in software forms. Limited to 5 results
+     * for performance and excludes null or empty versions.
+     * 
+     * @param string|null $search Optional search term to filter versions
+     * @return array Array of unique version strings
+     */
     public function getUniqueVersions($search = null): array
     {
         try {
@@ -285,6 +295,16 @@ class SoftwareProduct
         }
     }
     
+    /**
+     * Retrieve unique vendor names for autocomplete functionality
+     * 
+     * Returns distinct vendor names matching the optional search term.
+     * Used for vendor name field autocomplete in software forms. Limited to 5 results
+     * for performance and excludes null or empty vendor names.
+     * 
+     * @param string|null $search Optional search term to filter vendor names
+     * @return array Array of unique vendor name strings
+     */
     public function getUniqueVendorNames($search = null): array
     {
         try {

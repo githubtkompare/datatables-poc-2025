@@ -6,16 +6,52 @@ use App\Controllers\BaseController;
 use App\Config\Auth;
 use App\Config\Database;
 
+/**
+ * Administrator panel controller for system management and monitoring
+ * 
+ * Provides administrative functionality including system dashboard, database
+ * inspection, table viewing, and authentication management. All methods require
+ * administrator privileges for access.
+ * 
+ * Features:
+ * - System dashboard with database statistics
+ * - Table structure and data inspection
+ * - Authentication mode toggling (demo purposes)
+ * - Comprehensive error handling and logging
+ * - Security validation for database access
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class AdminController extends BaseController
 {
+    /**
+     * Database connection instance for administrative operations
+     * @var Database
+     */
     private $db;
     
+    /**
+     * Initialize AdminController with database connection
+     * 
+     * Sets up the controller with database access for administrative
+     * operations and inherits base controller functionality.
+     */
     public function __construct()
     {
         parent::__construct();
         $this->db = Database::getInstance();
     }
     
+    /**
+     * Display the administrator dashboard
+     * 
+     * Renders the main admin dashboard with system statistics and database
+     * information. Requires administrator authentication and provides overview
+     * of all database tables with record counts.
+     * 
+     * @return void Renders admin dashboard template or error page
+     */
     public function index()
     {
         // Require admin authentication
@@ -50,7 +86,13 @@ class AdminController extends BaseController
     }
     
     /**
-     * Toggle admin mode (for demo purposes)
+     * Toggle administrator privileges for demonstration purposes
+     * 
+     * API endpoint that switches between regular user and administrator modes.
+     * Returns JSON response indicating the new authentication state. Used for
+     * demo functionality to showcase different permission levels.
+     * 
+     * @return void Outputs JSON response with authentication status
      */
     public function toggleAdmin()
     {
@@ -87,7 +129,15 @@ class AdminController extends BaseController
     }
     
     /**
-     * View table structure and data
+     * Display database table structure and contents
+     * 
+     * Provides administrative view of database table including column structure,
+     * data types, and table contents. Includes security validation to prevent
+     * unauthorized table access and SQL injection attacks.
+     * 
+     * @param string $tableName Name of the database table to view
+     * @return void Renders table view template or error page
+     * @throws Exception When table name is not in allowed list
      */
     public function viewTable($tableName)
     {

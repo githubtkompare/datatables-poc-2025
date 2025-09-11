@@ -6,12 +6,53 @@ use App\Config\TwigConfig;
 use App\Models\SoftwareProduct;
 use App\Models\Employee;
 
+/**
+ * Software product management controller for comprehensive CRUD operations
+ * 
+ * Handles all software product functionality including listing, viewing,
+ * creating, editing, and deleting software records. Integrates with DataTables
+ * for dynamic data display and provides autocomplete functionality for
+ * enhanced user experience in forms.
+ * 
+ * Features:
+ * - DataTables integration with server-side processing
+ * - Software product CRUD operations with role assignments
+ * - Employee role management (business owner, technical owner, technical manager)
+ * - Autocomplete functionality for software names, versions, vendors, and employees
+ * - University unit association through business owner
+ * - Operating system compatibility tracking
+ * - Comprehensive error handling and logging
+ * 
+ * @author DataTables POC Team
+ * @version 1.0.0
+ */
 class SoftwareController
 {
+    /**
+     * Twig template engine instance
+     * @var \Twig\Environment
+     */
     private $twig;
+    
+    /**
+     * Software product model instance for database operations
+     * @var SoftwareProduct
+     */
     private $softwareModel;
+    
+    /**
+     * Employee model instance for role assignments and autocomplete
+     * @var Employee
+     */
     private $employeeModel;
     
+    /**
+     * Initialize SoftwareController with required dependencies
+     * 
+     * Sets up the controller with Twig templating, SoftwareProduct model
+     * for database operations, and Employee model for role assignments
+     * and autocomplete functionality.
+     */
     public function __construct()
     {
         $this->twig = TwigConfig::getInstance()->getTwig();
@@ -19,6 +60,15 @@ class SoftwareController
         $this->employeeModel = new Employee();
     }
     
+    /**
+     * Display the software products listing page
+     * 
+     * Renders the main software products index page with DataTables integration.
+     * The actual data loading is handled by getSoftwareData() method for
+     * server-side processing and performance optimization.
+     * 
+     * @return void Renders software index template or error page
+     */
     public function index()
     {
         try {
@@ -38,6 +88,16 @@ class SoftwareController
         }
     }
     
+    /**
+     * API endpoint for DataTables software product data
+     * 
+     * Provides server-side data processing for the software DataTable including
+     * pagination, sorting, searching, and filtering. Returns JSON formatted data
+     * with software information, role assignments, and university unit details.
+     * Optimized for handling large datasets efficiently.
+     * 
+     * @return void Outputs JSON response with DataTables formatted data
+     */
     public function getSoftwareData()
     {
         header('Content-Type: application/json');
@@ -161,6 +221,13 @@ class SoftwareController
         }
     }
     
+    /**
+     * API endpoint for software version autocomplete suggestions
+     * 
+     * Returns JSON response containing unique software versions that match
+     * the search query parameter. Used by frontend autocomplete functionality
+     * for the version input field.
+     */
     public function getVersionSuggestions()
     {
         header('Content-Type: application/json');
@@ -183,6 +250,13 @@ class SoftwareController
         }
     }
     
+    /**
+     * API endpoint for software vendor autocomplete suggestions
+     * 
+     * Returns JSON response containing unique vendor names that match
+     * the search query parameter. Used by frontend autocomplete functionality
+     * for the vendor name input field.
+     */
     public function getVendorSuggestions()
     {
         header('Content-Type: application/json');
@@ -205,6 +279,14 @@ class SoftwareController
         }
     }
     
+    /**
+     * API endpoint for employee autocomplete suggestions
+     * 
+     * Returns JSON response containing employee data that matches the search
+     * query parameter. Used by frontend autocomplete functionality for role
+     * assignment fields (business owner, technical owner, technical manager).
+     * Searches across first name, last name, and full name combinations.
+     */
     public function getEmployeeSuggestions()
     {
         header('Content-Type: application/json');
@@ -227,6 +309,16 @@ class SoftwareController
         }
     }
     
+    /**
+     * Display individual software product details
+     * 
+     * Shows comprehensive software product information including basic details,
+     * role assignments, operating system compatibility, and university unit
+     * association. Provides complete overview for software management.
+     * 
+     * @param int $id Software product ID to display
+     * @return void Renders software detail template or error page
+     */
     public function show($id)
     {
         try {
@@ -263,6 +355,15 @@ class SoftwareController
         }
     }
     
+    /**
+     * Display software creation form or process form submission
+     * 
+     * Handles both GET requests (show form) and POST requests (process form).
+     * Loads employee data for role assignment dropdowns and includes
+     * autocomplete functionality for enhanced user experience.
+     * 
+     * @return void Renders creation form, processes submission, or shows error
+     */
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -290,6 +391,15 @@ class SoftwareController
         }
     }
     
+    /**
+     * Process software creation form submission
+     * 
+     * Validates form data, creates new software product record with role
+     * assignments, and handles success/error responses. Includes comprehensive
+     * validation for required fields and role assignments.
+     * 
+     * @return void Redirects on success or renders form with errors
+     */
     public function store()
     {
         try {
@@ -363,6 +473,16 @@ class SoftwareController
         }
     }
     
+    /**
+     * Display software edit form or process form submission
+     * 
+     * Handles both GET requests (show populated form) and POST requests (process form).
+     * Loads existing software data and employee information for role assignments.
+     * Resolves employee IDs to names for autocomplete text inputs.
+     * 
+     * @param int $id Software product ID to edit
+     * @return void Renders edit form, processes submission, or shows error
+     */
     public function edit($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -431,6 +551,16 @@ class SoftwareController
         }
     }
     
+    /**
+     * Process software update form submission
+     * 
+     * Validates form data, updates existing software product record and role
+     * assignments, and handles success/error responses. Includes comprehensive
+     * validation for required fields and role assignments.
+     * 
+     * @param int $id Software product ID to update
+     * @return void Redirects on success or renders form with errors
+     */
     public function update($id)
     {
         try {
@@ -517,6 +647,15 @@ class SoftwareController
         }
     }
     
+    /**
+     * Delete software product record via AJAX request
+     * 
+     * Processes DELETE requests to remove software product records from the
+     * database. Returns JSON response indicating success or failure status.
+     * Handles referential integrity and related record cleanup.
+     * 
+     * @return void Outputs JSON response with deletion status
+     */
     public function delete()
     {
         header('Content-Type: application/json');

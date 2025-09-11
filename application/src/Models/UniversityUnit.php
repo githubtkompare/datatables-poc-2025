@@ -48,6 +48,20 @@ class UniversityUnit
         $this->db = Database::getInstance()->getConnection();
     }
     
+    /**
+     * Retrieve all university units with optional filtering, sorting, and pagination
+     * 
+     * Fetches university unit data using stored procedure with support for DataTables
+     * integration including search functionality, column sorting, and pagination.
+     * Returns unit records with hierarchical relationships and associated counts.
+     * 
+     * @param int|null $limit Maximum number of records to return (for pagination)
+     * @param int|null $offset Number of records to skip (for pagination)
+     * @param string|null $search Search term to filter units across multiple fields
+     * @param string|null $orderBy Column name to sort by
+     * @param string|null $orderDir Sort direction (ASC or DESC)
+     * @return array Array of university unit records with associated data
+     */
     public function getAllUnits($limit = null, $offset = null, $search = null, $orderBy = null, $orderDir = null): array
     {
         try {
@@ -67,6 +81,15 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Retrieve a specific university unit by its unique ID
+     * 
+     * Fetches complete university unit information including hierarchical
+     * relationships, software assignments, and employee counts for a single unit.
+     * 
+     * @param int $id Unique university unit identifier
+     * @return array|null University unit record with associated data, or null if not found
+     */
     public function getUnitById($id): ?array
     {
         try {
@@ -83,6 +106,16 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Retrieve all software products assigned to a specific university unit
+     * 
+     * Gets all software products associated with a university unit through
+     * business owner assignments. Includes software details and role assignment
+     * information for comprehensive unit software management.
+     * 
+     * @param int $unitId Unique university unit identifier
+     * @return array Array of software products assigned to the unit
+     */
     public function getUnitSoftware($unitId): array
     {
         try {
@@ -98,6 +131,21 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Create a new university unit record
+     * 
+     * Adds a new university unit to the database using stored procedure with
+     * data validation and constraint checking. Supports hierarchical relationships
+     * through parent unit assignment. Returns the newly created unit's ID.
+     * 
+     * @param array $data Associative array of university unit data including:
+     *                   - unit_name: Name of the university unit
+     *                   - unit_code: Optional unit code/abbreviation
+     *                   - description: Optional unit description
+     *                   - unit_type: Type of unit (department, college, etc.)
+     *                   - parent_unit_id: Optional parent unit for hierarchy
+     * @return int|null Newly created university unit ID, or null if creation failed
+     */
     public function createUnit($data): ?int
     {
         try {
@@ -122,6 +170,17 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Update an existing university unit record
+     * 
+     * Modifies an existing university unit's information using stored procedure
+     * with data validation and constraint checking. Preserves referential
+     * integrity with related records and hierarchical relationships.
+     * 
+     * @param int $id University unit ID to update
+     * @param array $data Associative array of updated university unit data
+     * @return bool True if update was successful, false otherwise
+     */
     public function updateUnit($id, $data): bool
     {
         try {
@@ -147,6 +206,16 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Delete a university unit record
+     * 
+     * Removes a university unit from the database using stored procedure with
+     * referential integrity checks. May fail if unit has associated employees
+     * or software assignments that need to be handled first.
+     * 
+     * @param int $id University unit ID to delete
+     * @return bool True if deletion was successful, false otherwise
+     */
     public function deleteUnit($id): bool
     {
         try {
@@ -166,6 +235,16 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Get total count of university unit records with optional search filtering
+     * 
+     * Returns the total number of university unit records in the database,
+     * optionally filtered by search criteria. Used for pagination calculations
+     * and dashboard statistics.
+     * 
+     * @param string|null $search Optional search term to filter count
+     * @return int Total number of university unit records (filtered if search provided)
+     */
     public function getTotalCount($search = null): int
     {
         try {
@@ -185,6 +264,15 @@ class UniversityUnit
         }
     }
     
+    /**
+     * Retrieve all available university unit types
+     * 
+     * Returns an array of standard university unit types for dropdown
+     * and categorization purposes. Used in forms and filtering to maintain
+     * consistency in unit categorization.
+     * 
+     * @return array Array of available unit type strings
+     */
     public function getUnitTypes(): array
     {
         return [
@@ -197,7 +285,13 @@ class UniversityUnit
     }
     
     /**
-     * Get all university units for dropdown selection
+     * Retrieve all university units formatted for dropdown selection
+     * 
+     * Returns university units in a format suitable for HTML select dropdowns
+     * and form controls. Includes hierarchical display formatting and excludes
+     * unnecessary data for optimal performance.
+     * 
+     * @return array Array of university units formatted for dropdown display
      */
     public function getAllUnitsForDropdown(): array
     {
