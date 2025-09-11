@@ -263,4 +263,55 @@ class Employee
             return 0;
         }
     }
+    
+    /**
+     * Search employees by name for autocomplete functionality
+     * 
+     * Returns a list of employees matching the search term in either first name
+     * or last name. Results include ID, formatted full name, and job title for
+     * easy identification. Limited to 10 results for performance.
+     * 
+     * @param string|null $search Search term to match against first/last names
+     * @return array Array of employee data with id, full_name, job_title, and unit_name
+     */
+    public function searchEmployees($search = null): array
+    {
+        try {
+            if (!empty($search)) {
+                $sql = "SELECT e.id, 
+                               CONCAT(e.first_name, ' ', e.last_name) as full_name,
+                               e.job_title,
+                               u.unit_name
+                        FROM employees e
+                        LEFT JOIN university_units u ON e.university_unit_id = u.id
+                        WHERE (e.first_name LIKE CONCAT('%', ?, '%') 
+                           OR e.last_name LIKE CONCAT('%', ?, '%')
+                           OR CONCAT(e.first_name, ' ', e.last_name) LIKE CONCAT('%', ?, '%'))
+                        ORDER BY e.last_name, e.first_name 
+                        LIMIT 10";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(1, $search, PDO::PARAM_STR);
+                $stmt->bindParam(2, $search, PDO::PARAM_STR);
+                $stmt->bindParam(3, $search, PDO::PARAM_STR);
+            } else {
+                $sql = "SELECT e.id, 
+                               CONCAT(e.first_name, ' ', e.last_name) as full_name,
+                               e.job_title,
+                               u.unit_name
+                        FROM employees e
+                        LEFT JOIN university_units u ON e.university_unit_id = u.id
+                        ORDER BY e.last_name, e.first_name 
+                        LIMIT 10";
+                $stmt = $this->db->prepare($sql);
+            }
+            
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+            
+        } catch (PDOException $e) {
+            error_log("Error searching employees: " . $e->getMessage());
+            return [];
+        }
+    }
 }

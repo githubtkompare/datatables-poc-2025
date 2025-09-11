@@ -154,6 +154,18 @@ try {
         $controller = new SoftwareController();
         $controller->getAutocompleteSuggestions();
         
+    } elseif ($path === '/software/autocomplete/version') {
+        $controller = new SoftwareController();
+        $controller->getVersionSuggestions();
+        
+    } elseif ($path === '/software/autocomplete/vendor') {
+        $controller = new SoftwareController();
+        $controller->getVendorSuggestions();
+        
+    } elseif ($path === '/software/autocomplete/employee') {
+        $controller = new SoftwareController();
+        $controller->getEmployeeSuggestions();
+        
     } elseif (preg_match('/^\/software\/(\d+)$/', $path, $matches)) {
         $controller = new SoftwareController();
         $controller->show($matches[1]);

@@ -161,6 +161,72 @@ class SoftwareController
         }
     }
     
+    public function getVersionSuggestions()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $search = $_GET['q'] ?? '';
+            $suggestions = $this->softwareModel->getUniqueVersions($search);
+            
+            echo json_encode([
+                'suggestions' => $suggestions
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Software version autocomplete error: " . $e->getMessage());
+            
+            echo json_encode([
+                'suggestions' => [],
+                'error' => 'Unable to load version suggestions'
+            ]);
+        }
+    }
+    
+    public function getVendorSuggestions()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $search = $_GET['q'] ?? '';
+            $suggestions = $this->softwareModel->getUniqueVendorNames($search);
+            
+            echo json_encode([
+                'suggestions' => $suggestions
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Software vendor autocomplete error: " . $e->getMessage());
+            
+            echo json_encode([
+                'suggestions' => [],
+                'error' => 'Unable to load vendor suggestions'
+            ]);
+        }
+    }
+    
+    public function getEmployeeSuggestions()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $search = $_GET['q'] ?? '';
+            $employees = $this->employeeModel->searchEmployees($search);
+            
+            echo json_encode([
+                'suggestions' => $employees
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Employee autocomplete error: " . $e->getMessage());
+            
+            echo json_encode([
+                'suggestions' => [],
+                'error' => 'Unable to load employee suggestions'
+            ]);
+        }
+    }
+    
     public function show($id)
     {
         try {
@@ -318,10 +384,39 @@ class SoftwareController
             
             $employees = $this->employeeModel->getAllEmployees();
             
+            // Get current employee names for the text inputs
+            $businessOwnerName = '';
+            $technicalOwnerName = '';
+            $technicalManagerName = '';
+            
+            if ($software['business_owner_id']) {
+                $businessOwner = $this->employeeModel->getEmployeeById($software['business_owner_id']);
+                if ($businessOwner) {
+                    $businessOwnerName = $businessOwner['first_name'] . ' ' . $businessOwner['last_name'];
+                }
+            }
+            
+            if ($software['technical_owner_id']) {
+                $technicalOwner = $this->employeeModel->getEmployeeById($software['technical_owner_id']);
+                if ($technicalOwner) {
+                    $technicalOwnerName = $technicalOwner['first_name'] . ' ' . $technicalOwner['last_name'];
+                }
+            }
+            
+            if ($software['technical_manager_id']) {
+                $technicalManager = $this->employeeModel->getEmployeeById($software['technical_manager_id']);
+                if ($technicalManager) {
+                    $technicalManagerName = $technicalManager['first_name'] . ' ' . $technicalManager['last_name'];
+                }
+            }
+            
             echo $this->twig->render('software/edit.twig', [
                 'title' => 'Edit Software - ' . $software['software_name'],
                 'software' => $software,
                 'employees' => $employees,
+                'business_owner_name' => $businessOwnerName,
+                'technical_owner_name' => $technicalOwnerName,
+                'technical_manager_name' => $technicalManagerName,
                 'page' => 'software'
             ]);
             
@@ -370,12 +465,22 @@ class SoftwareController
             if (!empty($errors)) {
                 $software = array_merge(['id' => $id], $data);
                 $employees = $this->employeeModel->getAllEmployees();
+                
+                // Get current employee names for the text inputs from form data
+                $businessOwnerName = $_POST['business_owner_name'] ?? '';
+                $technicalOwnerName = $_POST['technical_owner_name'] ?? '';
+                $technicalManagerName = $_POST['technical_manager_name'] ?? '';
+                
                 echo $this->twig->render('software/edit.twig', [
                     'title' => 'Edit Software',
                     'software' => $software,
                     'employees' => $employees,
+                    'business_owner_name' => $businessOwnerName,
+                    'technical_owner_name' => $technicalOwnerName,
+                    'technical_manager_name' => $technicalManagerName,
                     'page' => 'software',
-                    'errors' => $errors
+                    'errors' => $errors,
+                    'form_data' => $_POST
                 ]);
                 return;
             }

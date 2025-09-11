@@ -64,7 +64,11 @@
                                     value="{{ form_data.version|default('') }}"
                                     maxlength="50"
                                     placeholder="e.g. 2024, v1.5.2"
+                                    list="version_list"
+                                    autocomplete="off"
                                 >
+                                <datalist id="version_list">
+                                </datalist>
                             </div>
                         </div>
                     </div>
@@ -124,7 +128,11 @@
                                     value="{{ form_data.vendor_name|default('') }}"
                                     maxlength="255"
                                     placeholder="e.g. Microsoft, Adobe, Oracle"
+                                    list="vendor_list"
+                                    autocomplete="off"
                                 >
+                                <datalist id="vendor_list">
+                                </datalist>
                                 <div class="form-text">Only required if vendor managed</div>
                             </div>
                         </div>
@@ -158,16 +166,19 @@
                                         <label for="business_owner_id" class="form-label">
                                             <i class="fas fa-briefcase me-1"></i>Business Owner <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-control" id="business_owner_id" name="business_owner_id" required>
-                                            <option value="">Select business owner...</option>
-                                            {% for employee in employees %}
-                                                <option value="{{ employee.id }}" 
-                                                    {% if form_data.business_owner_id == employee.id %}selected{% endif %}>
-                                                    {{ employee.first_name }} {{ employee.last_name }} 
-                                                    {% if employee.university_unit_name %}({{ employee.university_unit_name }}){% endif %}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                        <input 
+                                            type="text" 
+                                            class="form-control employee-autocomplete" 
+                                            id="business_owner_name" 
+                                            name="business_owner_name"
+                                            placeholder="Type to search for employee..."
+                                            list="business_owner_list"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                        <input type="hidden" id="business_owner_id" name="business_owner_id" value="">
+                                        <datalist id="business_owner_list">
+                                        </datalist>
                                         <div class="form-text">Determines the software's university unit</div>
                                     </div>
                                 </div>
@@ -176,16 +187,19 @@
                                         <label for="technical_owner_id" class="form-label">
                                             <i class="fas fa-cog me-1"></i>Technical Owner <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-control" id="technical_owner_id" name="technical_owner_id" required>
-                                            <option value="">Select technical owner...</option>
-                                            {% for employee in employees %}
-                                                <option value="{{ employee.id }}" 
-                                                    {% if form_data.technical_owner_id == employee.id %}selected{% endif %}>
-                                                    {{ employee.first_name }} {{ employee.last_name }} 
-                                                    {% if employee.job_title %}({{ employee.job_title }}){% endif %}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                        <input 
+                                            type="text" 
+                                            class="form-control employee-autocomplete" 
+                                            id="technical_owner_name" 
+                                            name="technical_owner_name"
+                                            placeholder="Type to search for employee..."
+                                            list="technical_owner_list"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                        <input type="hidden" id="technical_owner_id" name="technical_owner_id" value="">
+                                        <datalist id="technical_owner_list">
+                                        </datalist>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -193,16 +207,19 @@
                                         <label for="technical_manager_id" class="form-label">
                                             <i class="fas fa-users-cog me-1"></i>Technical Manager <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-control" id="technical_manager_id" name="technical_manager_id" required>
-                                            <option value="">Select technical manager...</option>
-                                            {% for employee in employees %}
-                                                <option value="{{ employee.id }}" 
-                                                    {% if form_data.technical_manager_id == employee.id %}selected{% endif %}>
-                                                    {{ employee.first_name }} {{ employee.last_name }} 
-                                                    {% if employee.job_title %}({{ employee.job_title }}){% endif %}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                        <input 
+                                            type="text" 
+                                            class="form-control employee-autocomplete" 
+                                            id="technical_manager_name" 
+                                            name="technical_manager_name"
+                                            placeholder="Type to search for employee..."
+                                            list="technical_manager_list"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                        <input type="hidden" id="technical_manager_id" name="technical_manager_id" value="">
+                                        <datalist id="technical_manager_list">
+                                        </datalist>
                                     </div>
                                 </div>
                             </div>
@@ -274,6 +291,168 @@ $(document).ready(function() {
         loadAutocompleteSuggestions(query);
     });
     
+    // Version autocomplete functionality
+    let versionTimeout;
+    
+    function loadVersionSuggestions(query) {
+        if (versionTimeout) {
+            clearTimeout(versionTimeout);
+        }
+        
+        versionTimeout = setTimeout(function() {
+            $.ajax({
+                url: '/software/autocomplete/version',
+                method: 'GET',
+                data: { q: query || '' },
+                dataType: 'json',
+                success: function(data) {
+                    const datalist = $('#version_list');
+                    datalist.empty();
+                    
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        data.suggestions.forEach(function(suggestion) {
+                            datalist.append('<option value="' + suggestion + '">');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching version suggestions:', error);
+                }
+            });
+        }, 300);
+    }
+    
+    $('#version').on('input', function() {
+        const query = $(this).val().trim();
+        loadVersionSuggestions(query);
+    });
+    
+    $('#version').on('focus', function() {
+        const query = $(this).val().trim();
+        loadVersionSuggestions(query);
+    });
+    
+    // Vendor autocomplete functionality
+    let vendorTimeout;
+    
+    function loadVendorSuggestions(query) {
+        if (vendorTimeout) {
+            clearTimeout(vendorTimeout);
+        }
+        
+        vendorTimeout = setTimeout(function() {
+            $.ajax({
+                url: '/software/autocomplete/vendor',
+                method: 'GET',
+                data: { q: query || '' },
+                dataType: 'json',
+                success: function(data) {
+                    const datalist = $('#vendor_list');
+                    datalist.empty();
+                    
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        data.suggestions.forEach(function(suggestion) {
+                            datalist.append('<option value="' + suggestion + '">');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching vendor suggestions:', error);
+                }
+            });
+        }, 300);
+    }
+    
+    $('#vendor_name').on('input', function() {
+        const query = $(this).val().trim();
+        loadVendorSuggestions(query);
+    });
+    
+    $('#vendor_name').on('focus', function() {
+        const query = $(this).val().trim();
+        loadVendorSuggestions(query);
+    });
+    
+    // Employee autocomplete functionality
+    let employeeTimeout;
+    let selectedEmployees = {}; // Track valid employee selections
+    
+    function loadEmployeeSuggestions(query, inputField, datalistId) {
+        if (employeeTimeout) {
+            clearTimeout(employeeTimeout);
+        }
+        
+        employeeTimeout = setTimeout(function() {
+            $.ajax({
+                url: '/software/autocomplete/employee',
+                method: 'GET',
+                data: { q: query || '' },
+                dataType: 'json',
+                success: function(data) {
+                    const datalist = $('#' + datalistId);
+                    datalist.empty();
+                    
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        data.suggestions.forEach(function(employee) {
+                            const displayText = employee.full_name + (employee.job_title ? ' (' + employee.job_title + ')' : '');
+                            datalist.append('<option value="' + displayText + '" data-id="' + employee.id + '">');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching employee suggestions:', error);
+                }
+            });
+        }, 300);
+    }
+    
+    function setupEmployeeAutocomplete(nameField, hiddenField, datalist) {
+        $('#' + nameField).on('input', function() {
+            const query = $(this).val().trim();
+            loadEmployeeSuggestions(query, nameField, datalist);
+            
+            // Clear hidden field when typing
+            $('#' + hiddenField).val('');
+            selectedEmployees[nameField] = null;
+        });
+        
+        $('#' + nameField).on('focus', function() {
+            const query = $(this).val().trim();
+            loadEmployeeSuggestions(query, nameField, datalist);
+        });
+        
+        // Handle selection from datalist
+        $('#' + nameField).on('change blur', function() {
+            const inputValue = $(this).val().trim();
+            const datalistOptions = $('#' + datalist + ' option');
+            let found = false;
+            
+            datalistOptions.each(function() {
+                if ($(this).val() === inputValue) {
+                    const employeeId = $(this).attr('data-id');
+                    $('#' + hiddenField).val(employeeId);
+                    selectedEmployees[nameField] = { id: employeeId, name: inputValue };
+                    found = true;
+                    return false; // break loop
+                }
+            });
+            
+            if (!found && inputValue !== '') {
+                // Invalid selection - clear the field
+                $(this).addClass('is-invalid');
+                $('#' + hiddenField).val('');
+                selectedEmployees[nameField] = null;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+    }
+    
+    // Setup autocomplete for all three role fields
+    setupEmployeeAutocomplete('business_owner_name', 'business_owner_id', 'business_owner_list');
+    setupEmployeeAutocomplete('technical_owner_name', 'technical_owner_id', 'technical_owner_list');
+    setupEmployeeAutocomplete('technical_manager_name', 'technical_manager_id', 'technical_manager_list');
+    
     // Toggle vendor name field based on vendor managed selection
     function toggleVendorField() {
         const isVendorManaged = $('#vendor_managed_yes').is(':checked');
@@ -319,22 +498,22 @@ $(document).ready(function() {
         // Validate role assignments
         if (!businessOwner) {
             e.preventDefault();
-            alert('Please select a business owner.');
-            $('#business_owner_id').focus();
+            alert('Please select a valid business owner.');
+            $('#business_owner_name').focus();
             return false;
         }
         
         if (!technicalOwner) {
             e.preventDefault();
-            alert('Please select a technical owner.');
-            $('#technical_owner_id').focus();
+            alert('Please select a valid technical owner.');
+            $('#technical_owner_name').focus();
             return false;
         }
         
         if (!technicalManager) {
             e.preventDefault();
-            alert('Please select a technical manager.');
-            $('#technical_manager_id').focus();
+            alert('Please select a valid technical manager.');
+            $('#technical_manager_name').focus();
             return false;
         }
     });

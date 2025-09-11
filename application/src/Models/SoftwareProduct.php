@@ -254,4 +254,64 @@ class SoftwareProduct
             return [];
         }
     }
+    
+    public function getUniqueVersions($search = null): array
+    {
+        try {
+            if (!empty($search)) {
+                $sql = "SELECT DISTINCT version 
+                        FROM software_products 
+                        WHERE version IS NOT NULL AND version != '' AND version LIKE CONCAT('%', ?, '%')
+                        ORDER BY version ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(1, $search, PDO::PARAM_STR);
+            } else {
+                $sql = "SELECT DISTINCT version 
+                        FROM software_products 
+                        WHERE version IS NOT NULL AND version != ''
+                        ORDER BY version ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+            }
+            
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $results;
+            
+        } catch (PDOException $e) {
+            error_log("Error getting unique versions: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    public function getUniqueVendorNames($search = null): array
+    {
+        try {
+            if (!empty($search)) {
+                $sql = "SELECT DISTINCT vendor_name 
+                        FROM software_products 
+                        WHERE vendor_name IS NOT NULL AND vendor_name != '' AND vendor_name LIKE CONCAT('%', ?, '%')
+                        ORDER BY vendor_name ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(1, $search, PDO::PARAM_STR);
+            } else {
+                $sql = "SELECT DISTINCT vendor_name 
+                        FROM software_products 
+                        WHERE vendor_name IS NOT NULL AND vendor_name != ''
+                        ORDER BY vendor_name ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+            }
+            
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $results;
+            
+        } catch (PDOException $e) {
+            error_log("Error getting unique vendor names: " . $e->getMessage());
+            return [];
+        }
+    }
 }
