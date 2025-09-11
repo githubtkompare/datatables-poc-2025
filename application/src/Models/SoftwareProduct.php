@@ -229,10 +229,23 @@ class SoftwareProduct
     public function getUniqueSoftwareNames($search = null): array
     {
         try {
-            $stmt = $this->db->prepare("CALL sp_get_unique_software_names(?)");
-            $stmt->bindParam(1, $search, PDO::PARAM_STR);
-            $stmt->execute();
+            if (!empty($search)) {
+                $sql = "SELECT DISTINCT software_name 
+                        FROM software_products 
+                        WHERE software_name LIKE CONCAT('%', ?, '%')
+                        ORDER BY software_name ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(1, $search, PDO::PARAM_STR);
+            } else {
+                $sql = "SELECT DISTINCT software_name 
+                        FROM software_products 
+                        ORDER BY software_name ASC 
+                        LIMIT 5";
+                $stmt = $this->db->prepare($sql);
+            }
             
+            $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
             return $results;
             
